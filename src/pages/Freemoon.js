@@ -100,7 +100,7 @@ const Message = styled.div`
 export default function Freemoon({ connection }) {
 
   const SUB_DEFAULT = "Connect wallet or input address to subscribe."
-  const ENTER_DEFAULT = "Input address to enter."
+  const CLAIM_DEFAULT = "Input address to claim for."
   const BUY_DEFAULT = "Enter amount of FSN to timelock."
   const LOADING = "Please wait ..."
   const SUCCESS = "Success!"
@@ -108,11 +108,11 @@ export default function Freemoon({ connection }) {
   const [ accounts, setAccounts ] = useState("")
 
   const [ subAccount, setSubAccount ] = useState("")
-  const [ enterAccount, setEnterAccount ] = useState("")
+  const [ claimAccount, setClaimAccount ] = useState("")
   const [ buyAmount, setBuyAmount ] = useState("")
 
   const [ subMessage, setSubMessage ] = useState(SUB_DEFAULT)
-  const [ enterMessage, setEnterMessage ] = useState(ENTER_DEFAULT)
+  const [ claimMessage, setClaimMessage ] = useState(CLAIM_DEFAULT)
   const [ buyMessage, setBuyMessage ] = useState(BUY_DEFAULT)
 
   useEffect(() => {
@@ -162,17 +162,17 @@ export default function Freemoon({ connection }) {
     }
     const nextEntry = await checkCooldownTime(subAccount, faucetAbs)
     if(nextEntry > Date.now()/1000) {
-      setEnterMessage(`This address has entered in the last hour. Next entry available at: ${new Date(nextEntry*1000).toUTCString()}`)
+      setClaimMessage(`This address has entered in the last hour. Next entry available at: ${new Date(nextEntry*1000).toUTCString()}`)
       return
     }
 
     try {
-      setEnterMessage(LOADING)
-      await faucetAbs.methods.enter(enterAccount).send({from: accounts[0]})
-      setEnterMessage(SUCCESS)
+      setClaimMessage(LOADING)
+      await faucetAbs.methods.enter(claimAccount).send({from: accounts[0]})
+      setClaimMessage(SUCCESS)
     } catch(err) {
       console.log(err)
-      setEnterMessage(ENTER_DEFAULT)
+      setClaimMessage(CLAIM_DEFAULT)
     }
   }
 
@@ -214,20 +214,20 @@ export default function Freemoon({ connection }) {
           {subMessage}
         </Message>
         <Title>
-          Enter Lottery
+          Claim FREE
         </Title>
         <Detail>
-          Here you can enter a subscribed address into the FREEMOON lottery. Doing so will send 1 FREE to that address. Entering is allowed once per hour.
+          Here you can claim FREE for a subscribed address.  Claiming is allowed once per hour. Doing so will enter it into the FREEMOON lottery.
           The lottery category entered is determined by the address' FREE balance.
         </Detail>
         <Bar>
-          <Input placeholder="Address to enter ..." spellCheck={false} onChange={e => setEnterAccount(e.target.value)}/>
+          <Input placeholder="Address to claim for ..." spellCheck={false} onChange={e => setClaimAccount(e.target.value)}/>
           <Fill onClick={() => enter()}>
             <IoDice size="40"/>
           </Fill>
         </Bar>
         <Message>
-          {enterMessage}
+          {claimMessage}
         </Message>
         <Title>
           Buy FREE

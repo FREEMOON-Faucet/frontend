@@ -19,9 +19,9 @@ const config = {
       name: "Fusion Testnet",
       id: 46688,
       contracts: {
-        free: "",
-        freemoon: "",
-        faucet: "",
+        free: "0xeFb4859410D57fF9a0f01E696A0E7e06Ebde020E",
+        freemoon: "0x8916fdDd7181D36a8A0deC81b2BDc32164A47DE3",
+        faucet: "0x77aE9d69A428AcdB88dbcDA41f35fD910F1D40d7",
         airdrop: ""
       }
     },

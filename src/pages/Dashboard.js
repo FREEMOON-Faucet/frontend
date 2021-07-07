@@ -74,9 +74,14 @@ export default function Dashboard({ connection }) {
       const freemoon = await FreemoonContract(web3)
       const faucet = await FaucetContract(web3)
 
-      loadStats.freeTs = web3.utils.fromWei(await free.methods.circulationSupply().call())
+      const freeTs = await free.methods.circulationSupply().call()
+      loadStats.freeTs = web3.utils.fromWei(freeTs)
+
       loadStats.faucetSubs = await faucet.methods.subscribers().call()
-      loadStats.fmnTs = web3.utils.fromWei(await freemoon.methods.circulationSupply().call())
+
+      const fmnTs = await freemoon.methods.circulationSupply().call()
+      loadStats.fmnTs = web3.utils.fromWei(fmnTs)
+
       loadStats.fmnWinners = await faucet.methods.winners().call()
 
       setStats(loadStats)
