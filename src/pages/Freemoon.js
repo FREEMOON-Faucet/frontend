@@ -152,17 +152,17 @@ export default function Freemoon({ connection }) {
     }
   }
 
-  const enter = async () => {
+  const claim = async () => {
     const web3 = new Web3(connection.provider)
     const faucetAbs = await FaucetContract(web3)
     const isSubscribed = await checkForSubscribe(subAccount, faucetAbs)
     if(!isSubscribed) {
-      setSubMessage("This address is not subscribed.")
+      setClaimMessage("This address is not subscribed.")
       return
     }
     const nextEntry = await checkCooldownTime(subAccount, faucetAbs)
     if(nextEntry > Date.now()/1000) {
-      setClaimMessage(`This address has entered in the last hour. Next entry available at: ${new Date(nextEntry*1000).toUTCString()}`)
+      setClaimMessage(`This address has claimed in the last hour. Next claim available at: ${new Date(nextEntry*1000).toUTCString()}`)
       return
     }
 
@@ -181,7 +181,7 @@ export default function Freemoon({ connection }) {
     const faucetAbs = await FaucetContract(web3)
     const isSubscribed = await checkForSubscribe(subAccount, faucetAbs)
     if(!isSubscribed) {
-      setSubMessage("This address is not subscribed.")
+      setBuyMessage("This address is not subscribed.")
       return
     }
 
@@ -222,7 +222,7 @@ export default function Freemoon({ connection }) {
         </Detail>
         <Bar>
           <Input placeholder="Address to claim for ..." spellCheck={false} onChange={e => setClaimAccount(e.target.value)}/>
-          <Fill onClick={() => enter()}>
+          <Fill onClick={() => claim()}>
             <IoDice size="40"/>
           </Fill>
         </Bar>
