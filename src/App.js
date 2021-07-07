@@ -13,8 +13,7 @@ const AppContainer = styled.div`
 `
 
 const Logo = styled.img`
-  width: 20%;
-  max-width: 120px;
+  width: 120px;
 `
 
 const Header = styled.div`
@@ -57,7 +56,7 @@ const Nav = styled.ul`
     justify-content: flex-start;
     align-items: center;
     width: 80%;
-    height: 200px;
+    height: 250px;
   }
 `
 
@@ -65,8 +64,8 @@ const Tab = styled.li`
   display: flex;
   justify-content: center;
   align-items: center;
-  max-width: ${props => props.wallet ? "30px" : "200px"};
-  width: ${props => props.wallet ? "2%" : "30%"};
+  max-width: ${props => props.wallet ? "40px" : "250px"};
+  width: ${props => props.wallet ? "10%" : "25%"};
   height: 100%;
   margin: ${props => props.wallet ? "0 0 0 2%" : "0"};
   padding: 0 1%;
@@ -84,7 +83,7 @@ const Tab = styled.li`
   @media screen and (orientation: portrait) {
     max-width: 100%;
     width: 100%;
-    height: 30%;
+    height: 40%;
     margin: ${props => props.wallet ? "2% 0" : "0"};
   }
 `
@@ -93,6 +92,8 @@ function App() {
 
   const [ accounts, setAccounts ] = useState([])
   const [ provider, setProvider ] = useState({})
+  const [ connected, setConnected ] = useState(false)
+
   const [ active, setActive ] = useState(0)
 
   const connect = async () => {
@@ -101,6 +102,11 @@ function App() {
       try {
         setAccounts(await ethereum.request({ method: "eth_requestAccounts" }))
         setProvider(ethereum)
+        setConnected(true)
+
+        window.ethereum.on("chainChanged", () => {
+          window.location.reload()
+        })
       } catch(err) {
         console.log(err.message)
         setAccounts([])
@@ -119,7 +125,7 @@ function App() {
     <AppContainer>
       <GlobalStyle/>
       <Header>
-        <Logo src={logo} alt="The FREEMOON Faucet"/>
+        <a href="https://freemoon.info"><Logo src={logo} alt="The FREEMOON Faucet"/></a>
         <Title>
           The FREEMOON Faucet
         </Title>
@@ -128,13 +134,14 @@ function App() {
         </Subtitle>
       </Header>
       <Nav>
-        <Tab active={active === 0} onClick={() => setActive(0)}>Gas Faucet</Tab>
-        <Tab active={active === 1} onClick={() => setActive(1)}>FREEMOON Faucet</Tab>
-        <Tab active={active === 2} onClick={() => setActive(2)}>Airdrops</Tab>
-        <Tab active={active === 3} onClick={() => setActive(3)}>Bot Army</Tab>
+        <Tab active={active === 0} onClick={() => setActive(0)}>Dashboard</Tab>
+        <Tab active={active === 1} onClick={() => setActive(1)}>Gas Faucet</Tab>
+        <Tab active={active === 2} onClick={() => setActive(2)}>FREEMOON Faucet</Tab>
+        <Tab active={active === 3} onClick={() => setActive(3)}>Airdrops</Tab>
+        <Tab active={active === 4} onClick={() => setActive(4)}>Bot Army</Tab>
         <Tab active={false} wallet={true} connected={accounts.length > 0} onClick={() => checkConnect() ? connect() : ""}><FaPlug size={25}/></Tab>
       </Nav>
-      <Content display={active} provider={{ accounts: accounts, web3: provider }}/>
+      <Content display={active} connection={{ accounts: accounts, provider: provider, connected: connected }}/>
     </AppContainer>
   );
 }

@@ -7,6 +7,9 @@ const GlobalStyle = createGlobalStyle`
     background: #fff;
     font-family: Open-Sans, Helvetica, Sans-Serif;
     font-size: 12px;
+    ::-webkit-scrollbar {
+      display: none;
+    }
   }
 `
 

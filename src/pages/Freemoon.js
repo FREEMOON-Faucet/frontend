@@ -1,6 +1,9 @@
 import { useState, useEffect } from "react"
 import styled from "styled-components"
-import { RiWallet3Fill } from "react-icons/ri"
+import { IoWallet, IoDice, IoTime } from "react-icons/io5"
+import Web3 from "web3"
+
+import { FaucetContract } from "../utils/contracts"
 
 const FreemoonContainer = styled.div`
   display: flex;
@@ -13,7 +16,8 @@ const Title = styled.div`
   display: flex;
   justify-content: center;
   width: 100%;
-  height: 40px;
+  height: 25px;
+  margin-top: 20px;
   font-size: 1.5rem;
   font-weight: bold;
   text-align: center;
@@ -23,7 +27,10 @@ const Detail = styled.p`
   display: flex;
   justify-content: center;
   width: 70%;
-  margin: 20px 0;
+  max-width: 800px;
+  margin: 10px 0;
+  padding-top: 20px;
+  border-top: 1px solid #000;
   font-size: 1.2rem;
   text-align: center;
 `
@@ -39,7 +46,7 @@ const Bar = styled.div`
 
   @media screen and (orientation: portrait) {
     flex-direction: column;
-    width: 80%;
+    width: 70%;
     height: 100px;
   }
 `
@@ -56,6 +63,10 @@ const Input = styled.input`
   font-family: Courier New;
   font-size: 1.2rem;
   letter-spacing: 1px;
+
+  @media screen and (orientation: portrait) {
+    max-width: 650px;
+  }
 `
 
 const Fill = styled.div`
@@ -76,25 +87,171 @@ const Fill = styled.div`
   }
 `
 
+const Message = styled.div`
+  width: 80%;
+  font-size: 1rem;
+  font-style: italic;
+  text-align: center;
+  margin-top: 10px;
+  margin-bottom: 40px; 
+`
 
-export default function Freemoon({ provider }) {
 
-  return (
-    <FreemoonContainer>
-      <Title>FREEMOON Faucet</Title>
-      <Detail>
-        Here you can subscribe addresses to the FREEMOON Faucet. Subscribing an address allows it to enter the FREEMOON lottery once every hour.
-        Doing so will send the subscribed address 1 FREE.
-      </Detail>
-      <Bar>
-        <Input placeholder="Address to subscribe ..."></Input>
-        <Fill>
-          <RiWallet3Fill size="40"/>
-        </Fill>
-      </Bar>
-      <Detail>
-        
-      </Detail>
-    </FreemoonContainer>
-  )
+export default function Freemoon({ connection }) {
+
+  const SUB_DEFAULT = "Connect wallet or input address to subscribe."
+  const ENTER_DEFAULT = "Input address to enter."
+  const BUY_DEFAULT = "Enter amount of FSN to timelock."
+  const LOADING = "Please wait ..."
+  const SUCCESS = "Success!"
+
+  const [ accounts, setAccounts ] = useState("")
+
+  const [ subAccount, setSubAccount ] = useState("")
+  const [ enterAccount, setEnterAccount ] = useState("")
+  const [ buyAmount, setBuyAmount ] = useState("")
+
+  const [ subMessage, setSubMessage ] = useState(SUB_DEFAULT)
+  const [ enterMessage, setEnterMessage ] = useState(ENTER_DEFAULT)
+  const [ buyMessage, setBuyMessage ] = useState(BUY_DEFAULT)
+
+  useEffect(() => {
+    if(connection.connected) {
+      setAccounts(connection.accounts)
+      setSubAccount(connection.accounts[0])
+    }
+  }, [ connection ])
+
+  const checkForSubscribe = async (acc, faucetAbs) => {
+    const isSubscribed = await faucetAbs.methods.isSubscribed(acc).call()
+    return Boolean(isSubscribed)
+  }
+
+  const checkCooldownTime = async (acc, faucetAbs) => {
+    const cooldownTime = Number(await faucetAbs.methods.cooldownTime().call())
+    const lastEntry = Number(await faucetAbs.methods.previousEntry(acc).call())
+    return Number(lastEntry + cooldownTime)
+  }
+
+  const subscribe = async () => {
+    const web3 = new Web3(connection.provider)
+    const faucetAbs = await FaucetContract(web3)
+    const isSubscribed = await checkForSubscribe(subAccount, faucetAbs)
+    if(isSubscribed) {
+      setSubMessage("This address is already subscribed.")
+      return
+    }
+
+    try {
+      setSubMessage(LOADING)
+      await faucetAbs.methods.subscribe(subAccount).send({value: web3.utils.toWei("1", "ether"), from: accounts[0]})
+      setSubMessage(SUCCESS)
+    } catch(err) {
+      console.log(err.message)
+      setSubMessage(SUB_DEFAULT)
+    }
+  }
+
+  const enter = async () => {
+    const web3 = new Web3(connection.provider)
+    const faucetAbs = await FaucetContract(web3)
+    const isSubscribed = await checkForSubscribe(subAccount, faucetAbs)
+    if(!isSubscribed) {
+      setSubMessage("This address is not subscribed.")
+      return
+    }
+    const nextEntry = await checkCooldownTime(subAccount, faucetAbs)
+    if(nextEntry > Date.now()/1000) {
+      setEnterMessage(`This address has entered in the last hour. Next entry available at: ${new Date(nextEntry*1000).toUTCString()}`)
+      return
+    }
+
+    try {
+      setEnterMessage(LOADING)
+      await faucetAbs.methods.enter(enterAccount).send({from: accounts[0]})
+      setEnterMessage(SUCCESS)
+    } catch(err) {
+      console.log(err)
+      setEnterMessage(ENTER_DEFAULT)
+    }
+  }
+
+  const buyFree = async () => {
+    const web3 = new Web3(connection.provider)
+    const faucetAbs = await FaucetContract(web3)
+    const isSubscribed = await checkForSubscribe(subAccount, faucetAbs)
+    if(!isSubscribed) {
+      setSubMessage("This address is not subscribed.")
+      return
+    }
+
+    try {
+      setBuyMessage(LOADING)
+      await faucetAbs.methods.timelockToFree().send({value: web3.utils.toWei(String(buyAmount), "ether"), from: accounts[0]})
+      setBuyMessage(SUCCESS)
+    } catch(err) {
+      console.log(err)
+      setBuyMessage(BUY_DEFAULT)
+    }
+  }
+
+  if(connection.connected) {
+    return (
+      <FreemoonContainer>
+        <Title>
+          Subscribe
+        </Title>
+        <Detail>
+          Here you can subscribe addresses to the FREEMOON Faucet. Subscribing an address allows it to enter the FREEMOON lottery once every hour.
+        </Detail>
+        <Bar>
+          <Input placeholder="Address to subscribe ..." defaultValue={accounts[0]} spellCheck={false} onChange={e => setSubAccount(e.target.value)}/>
+          <Fill onClick={() => subscribe()}>
+            <IoWallet size="40"/>
+          </Fill>
+        </Bar>
+        <Message>
+          {subMessage}
+        </Message>
+        <Title>
+          Enter Lottery
+        </Title>
+        <Detail>
+          Here you can enter a subscribed address into the FREEMOON lottery. Doing so will send 1 FREE to that address. Entering is allowed once per hour.
+          The lottery category entered is determined by the address' FREE balance.
+        </Detail>
+        <Bar>
+          <Input placeholder="Address to enter ..." spellCheck={false} onChange={e => setEnterAccount(e.target.value)}/>
+          <Fill onClick={() => enter()}>
+            <IoDice size="40"/>
+          </Fill>
+        </Bar>
+        <Message>
+          {enterMessage}
+        </Message>
+        <Title>
+          Buy FREE
+        </Title>
+        <Detail>
+          You can buy FREE with timelock FSN. The current rate is:<br/>
+          1 4-month TL FSN == 50 FREE.
+        </Detail>
+        <Bar>
+          <Input placeholder="Amount of FSN to timelock ..." spellCheck={false} onChange={e => setBuyAmount(e.target.value)}/>
+          <Fill onClick={() => buyFree()}>
+            <IoTime size="40"/>
+          </Fill>
+        </Bar>
+        <Message>
+          {buyMessage}
+        </Message>
+      </FreemoonContainer>
+    )
+  } else {
+    return (
+      <FreemoonContainer>
+        <Detail>You must connect your MetaMask wallet to use this app.</Detail>
+      </FreemoonContainer>
+    )
+  }
 }

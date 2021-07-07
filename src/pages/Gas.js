@@ -14,7 +14,8 @@ const Title = styled.div`
   display: flex;
   justify-content: center;
   width: 100%;
-  height: 40px;
+  height: 25px;
+  margin-top: 20px;
   font-size: 1.5rem;
   font-weight: bold;
   text-align: center;
@@ -24,7 +25,10 @@ const Detail = styled.p`
   display: flex;
   justify-content: center;
   width: 70%;
-  margin: 20px 0;
+  max-width: 800px;
+  margin: 10px 0;
+  padding-top: 20px;
+  border-top: 1px solid #000;
   font-size: 1.2rem;
   text-align: center;
 `
@@ -40,7 +44,7 @@ const Bar = styled.div`
 
   @media screen and (orientation: portrait) {
     flex-direction: column;
-    width: 80%;
+    width: 70%;
     height: 100px;
   }
 `
@@ -57,6 +61,10 @@ const Input = styled.input`
   font-family: Courier New;
   font-size: 1.2rem;
   letter-spacing: 1px;
+
+  @media screen and (orientation: portrait) {
+    max-width: 650px;
+  }
 `
 
 const Fill = styled.div`
@@ -122,7 +130,7 @@ export default function Gas({ provider }) {
         once per day.
       </Detail>
       <Bar>
-        <Input placeholder="Your Fusion address ..." value={address} onChange={e => setAddress(e.target.value)} spellCheck="false"/>
+        <Input placeholder="Your Fusion address ..." defaultValue={address} onChange={e => setAddress(e.target.value)} spellCheck={false}/>
         <Fill onClick={() => validate()}>
           <RiGasStationFill size="40"/>
         </Fill>
