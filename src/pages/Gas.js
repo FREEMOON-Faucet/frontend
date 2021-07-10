@@ -110,7 +110,7 @@ export default function Gas({ provider }) {
       setAddress("")
       try {
         setMessage(`Please wait ...`)
-        const response = await axios.post(`http://localhost:3001/api/v1/retrieve`, {
+        const response = await axios.post("https://api.freemoon.xyz/api/v1/retrieve", {
           walletAddress: address
         })
         setMessage(`Success. Transaction hash: ${response.data.txHash}`)

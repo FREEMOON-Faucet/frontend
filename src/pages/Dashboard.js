@@ -50,7 +50,8 @@ const Box = styled.div`
   width: 95%;
   max-width: 1000px;
   height: 300px;
-  margin-top: 20px;
+  margin-bottom: 20px;
+  padding-bottom: 5px;
   border: 2px solid #000;
   text-align: center;
   overflow-wrap: break-word;
@@ -62,9 +63,9 @@ const Box = styled.div`
 
 const Row = styled.div`
   display: flex;
-  width: 100%;
-  height: 10%;
-  margin: 10px 0;
+  width: 98%;
+  height: 12%;
+  margin: 10px 1%;
 `
 
 const Label = styled.div`
@@ -73,7 +74,6 @@ const Label = styled.div`
   font-size: 1rem;
   font-weight: bold;
   text-align: left;
-  margin-left: 10px;
 `
 
 const Number = styled.div`
@@ -87,7 +87,7 @@ const Detail = styled.p`
   display: flex;
   justify-content: center;
   width: 90%;
-  height: 10%;
+  height: 27px;
   margin: 10px 0;
   max-width: 800px;
   border-bottom: 1px solid #000;
@@ -139,7 +139,7 @@ export default function Dashboard({ connection }) {
       getBalanceSupply(web3, connection.accounts[0], free, freemoon)
       getFreemoonFaucet(web3, network, free, freemoon, faucet)
       getFusionMainnet()
-      getLatestWin(web3, free, freemoon)
+      getLatestWin(web3, free, faucet)
     }
     if(connection.connected) getStats()
   }, [ connection ])
@@ -172,7 +172,51 @@ export default function Dashboard({ connection }) {
 
   const getFusionMainnet = async () => {}
 
-  const getLatestWin = async (web3, free, freemoon) => {}
+  const getLatestWin = async (web3, free, faucet) => {
+    let latestBlock = (await web3.eth.getBlock()).number
+    let currentBlock = latestBlock
+    let latestWinEvents
+    const historicWins = await faucet.methods.winners().call()
+    if(historicWins !== "0") {
+      for(let i = 0; i < latestBlock; i++) {
+        console.log("Loop number: ", i)
+        latestWinEvents = await faucet.getPastEvents("Win", {fromBlock: currentBlock, toBlock: currentBlock})
+        if(latestWinEvents.length) {
+          break
+        } else {
+          currentBlock--
+        }
+      }
+      console.log(currentBlock)
+      console.log("Should only be here with events: ", latestWinEvents)
+      let latest = latestWinEvents[0]
+      const timestamp = (await web3.eth.getBlock(currentBlock)).timestamp
+      const winningHash = web3.utils.soliditySha3(
+        latest.returnValues.lottery,
+        latest.returnValues.txHash,
+        latest.returnValues.blockHash
+      )
+      const freeHodl = web3.utils.fromWei(await free.methods.balanceOf(latest.returnValues.entrant).call())
+      setLatestWin({
+        by: latest.returnValues.entrant,
+        blockHeight: currentBlock,
+        date: new Date(timestamp*1000).toUTCString(),
+        winningHash: winningHash,
+        claimsSincePrevious: latest.returnValues.claimsTaken,
+        freeHodl: freeHodl
+      })
+    } else {
+      setLatestWin({
+        by: "No Winners Yet",
+        blockHeight: "-",
+        date: "-",
+        winningHash: "-",
+        claimsSincePrevious: "-",
+        freeHodl: "-"
+      })
+    }
+  }
+
 
   if(connection.connected) {
     return (
@@ -257,7 +301,7 @@ export default function Dashboard({ connection }) {
               <Number>{latestWin.winningHash}</Number>
             </Row>
             <Row>
-              <Label>Claims Since Last Win</Label>
+              <Label>Claims to Win</Label>
               <Number>{latestWin.claimsSincePrevious.toString()}</Number>
             </Row>
             <Row>
