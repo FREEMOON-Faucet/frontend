@@ -168,7 +168,7 @@ export default function Freemoon({ connection }) {
 
     try {
       setClaimMessage(LOADING)
-      await faucetAbs.methods.enter(claimAccount).send({from: accounts[0]})
+      await faucetAbs.methods.claim(claimAccount).send({from: accounts[0]})
       setClaimMessage(SUCCESS)
     } catch(err) {
       console.log(err)
@@ -250,7 +250,9 @@ export default function Freemoon({ connection }) {
   } else {
     return (
       <FreemoonContainer>
-        <Detail>You must connect your MetaMask wallet to use this app.</Detail>
+        <Detail>
+            You must connect your MetaMask wallet to use this app.
+        </Detail>
       </FreemoonContainer>
     )
   }

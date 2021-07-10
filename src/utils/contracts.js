@@ -5,17 +5,17 @@ const networkObj = async web3 => {
 
   if(id === 31337) {
     // hardhat local node
-    return config.networks.hardhat.contracts
+    return config.networks.hardhat
   }
 
   else if(id === 46688) {
     // fusion testnetwork
-    return config.networks.fsnTestnet.contracts
+    return config.networks.fsnTestnet
   }
 
   else if(id === 32659) {
     // fusion mainnetwork
-    return config.networks.fsnMainnet.contracts
+    return config.networks.fsnMainnet
   }
 
   else {
@@ -26,7 +26,7 @@ const networkObj = async web3 => {
 
 const FaucetContract = async web3 => {
   let faucetContract
-  const network = await networkObj(web3)
+  const network = (await networkObj(web3)).contracts
 
   if(network) {
     faucetContract = new web3.eth.Contract(
@@ -40,7 +40,7 @@ const FaucetContract = async web3 => {
 
 const FreeContract = async web3 => {
   let freeContract
-  const network = await networkObj(web3)
+  const network = (await networkObj(web3)).contracts
 
   if(network) {
     freeContract = new web3.eth.Contract(
@@ -54,7 +54,7 @@ const FreeContract = async web3 => {
 
 const FreemoonContract = async web3 => {
   let freemoonContract
-  const network = await networkObj(web3)
+  const network = (await networkObj(web3)).contracts
 
   if(network) {
     freemoonContract = new web3.eth.Contract(
@@ -68,7 +68,7 @@ const FreemoonContract = async web3 => {
 
 // const AirdropContract = async web3 => {
 //   let airdropContract
-//   const network = await networkObj(web3)
+//   const network = (await networkObj(web3)).contracts
 
 //   if(network) {
 //     airdropContract = new web3.eth.Contract(
@@ -85,5 +85,6 @@ export {
   FaucetContract,
   FreeContract,
   FreemoonContract,
-  // AirdropContract
+  // AirdropContract,
+  networkObj
 }

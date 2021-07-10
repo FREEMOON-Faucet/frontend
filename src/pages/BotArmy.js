@@ -7,18 +7,7 @@ const BotArmyContainer = styled.div`
   width: 100%;
 `
 
-const Title = styled.div`
-  display: flex;
-  justify-content: center;
-  width: 100%;
-  height: 25px;
-  margin-top: 20px;
-  font-size: 1.5rem;
-  font-weight: bold;
-  text-align: center;
-`
-
-const Detail = styled.p`
+const Title = styled.p`
   display: flex;
   justify-content: center;
   width: 70%;
@@ -36,8 +25,6 @@ export default function BotArmy() {
       <Title>
         Coming Soon!
       </Title>
-      <Detail>
-      </Detail>
     </BotArmyContainer>
   )
 }
