@@ -41,6 +41,18 @@ const config = {
     freemoon: freemoonABI,
     faucet: faucetABI,
     airdrop: airdropABI,
+  },
+  tokens: {
+    free: {
+      symbol: "FREE",
+      decimals: 18,
+      icon: ""
+    },
+    freemoon: {
+      symbol: "FMN",
+      decimals: 18,
+      icon: ""
+    }
   }
 }
 

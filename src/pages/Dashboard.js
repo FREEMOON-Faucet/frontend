@@ -141,6 +141,7 @@ export default function Dashboard({ connection }) {
       getFusionMainnet()
       getLatestWin(web3, free, faucet)
     }
+
     if(connection.connected) getStats()
   }, [ connection ])
 

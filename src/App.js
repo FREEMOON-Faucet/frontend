@@ -107,6 +107,10 @@ function App() {
         window.ethereum.on("chainChanged", () => {
           window.location.reload()
         })
+
+        window.ethereum.on("accountsChanged", () => {
+          window.location.reload()
+        })
       } catch(err) {
         console.log(err.message)
         setAccounts([])

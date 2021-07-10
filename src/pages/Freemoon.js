@@ -3,13 +3,27 @@ import styled from "styled-components"
 import { IoWallet, IoDice, IoTime } from "react-icons/io5"
 import Web3 from "web3"
 
-import { FaucetContract } from "../utils/contracts"
+import { FaucetContract, networkObj } from "../utils/contracts"
 
 const FreemoonContainer = styled.div`
   display: flex;
   flex-direction: column;
   align-items: center;
   width: 100%;
+`
+
+const AddTokens = styled.div`
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 75%;
+  max-width: 200px;
+  height: 40px;
+  border: 1px solid #000;
+  border-radius: 4px;
+  font-size: 1.2rem;
+  font-style: italic;
+  cursor: pointer;
 `
 
 const Title = styled.div`
@@ -104,6 +118,16 @@ export default function Freemoon({ connection }) {
   const BUY_DEFAULT = "Enter amount of FSN to timelock."
   const LOADING = "Please wait ..."
   const SUCCESS = "Success!"
+  const FREE = {
+    symbol: "FREE",
+    decimals: 18,
+    image: "https://freemoon.xyz/images/free.png"
+  }
+  const FMN = {
+    symbol: "FMN",
+    decimals: 18,
+    image: "https://freemoon.xyz/images/fmn.png"
+  }
 
   const [ accounts, setAccounts ] = useState("")
 
@@ -195,9 +219,50 @@ export default function Freemoon({ connection }) {
     }
   }
 
+  const addTokens = async () => {
+    const web3 = new Web3(connection.provider)
+    const network = await networkObj(web3)
+    try {
+      await connection.provider.request({
+        method: 'wallet_watchAsset',
+        params: {
+          type: 'ERC20',
+          options: {
+            address: network.contracts.free,
+            symbol: FREE.symbol,
+            decimals: FREE.decimals,
+            image: FREE.image,
+          },
+        },
+      })
+    } catch(error) {
+      console.log(error);
+    }
+    
+    try {
+      await connection.provider.request({
+        method: 'wallet_watchAsset',
+        params: {
+          type: 'ERC20',
+          options: {
+            address: network.contracts.freemoon,
+            symbol: FMN.symbol,
+            decimals: FMN.decimals,
+            image: FMN.image,
+          },
+        },
+      })
+    } catch(error) {
+      console.log(error);
+    }
+  }
+
   if(connection.connected) {
     return (
       <FreemoonContainer>
+        <AddTokens onClick={() => addTokens()}>
+          Add Tokens
+        </AddTokens>
         <Title>
           Subscribe
         </Title>
