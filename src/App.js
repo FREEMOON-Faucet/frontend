@@ -94,7 +94,7 @@ function App() {
   const [ provider, setProvider ] = useState({})
   const [ connected, setConnected ] = useState(false)
 
-  const [ active, setActive ] = useState(0)
+  const [ active, setActive ] = useState(2)
 
   const connect = async () => {
     const ethereum = window.ethereum

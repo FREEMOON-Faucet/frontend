@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react"
 import styled from "styled-components"
 import { IoWallet, IoDice, IoTime } from "react-icons/io5"
+import { FaCoins } from "react-icons/fa"
 import Web3 from "web3"
 
 import { FaucetContract, networkObj } from "../utils/contracts"
@@ -12,18 +13,38 @@ const FreemoonContainer = styled.div`
   width: 100%;
 `
 
-const AddTokens = styled.div`
+const Options = styled.div`
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  height: 230px;
+  margin: 10px 0;
+`
+
+const Extras = styled.div`
   display: flex;
   justify-content: center;
   align-items: center;
-  width: 75%;
-  max-width: 200px;
+  width: 80%;
+  max-width: 400px;
   height: 40px;
   border: 1px solid #000;
   border-radius: 4px;
   font-size: 1.2rem;
-  font-style: italic;
-  cursor: pointer;
+  cursor: ${props => props.checkbox ? "default" : "pointer"};
+`
+
+const Selection = styled.div`
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  width: 80%;
+  max-width: 400px;
+  height: 40px;
+  font-size: 1.2rem;
+  cursor: default;
 `
 
 const Title = styled.div`
@@ -110,12 +131,26 @@ const Message = styled.div`
   margin-bottom: 40px; 
 `
 
+const Admin = styled.div`
+  display: ${props => props.show ? "flex" : "none"};
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  border: 2px solid orange;
+`
+
+const Checkbox = styled.input`
+  width: 20px;
+  height: 20px;
+  margin-right: 20px;
+`
+
 
 export default function Freemoon({ connection }) {
 
   const SUB_DEFAULT = "Connect wallet or input address to subscribe."
   const CLAIM_DEFAULT = "Input address to claim for."
-  const BUY_DEFAULT = "Enter amount of FSN to timelock."
+  const MINT_DEFAULT = "Enter amount of FSN to timelock."
   const LOADING = "Please wait ..."
   const SUCCESS = "Success!"
   const FREE = {
@@ -137,14 +172,79 @@ export default function Freemoon({ connection }) {
 
   const [ subMessage, setSubMessage ] = useState(SUB_DEFAULT)
   const [ claimMessage, setClaimMessage ] = useState(CLAIM_DEFAULT)
-  const [ buyMessage, setBuyMessage ] = useState(BUY_DEFAULT)
+  const [ mintMessage, setMintMessage ] = useState(MINT_DEFAULT)
+
+  const [ isAdmin, setIsAdmin ] = useState(false)
+  const [ pauseStatus, setPauseStatus ] = useState({
+    subscribe: false,
+    timelockToFree: false,
+    claim: false,
+    resolveEntry: false
+  })
 
   useEffect(() => {
     if(connection.connected) {
       setAccounts(connection.accounts)
       setSubAccount(connection.accounts[0])
+      checkForAdmin()
     }
   }, [ connection ])
+
+  const checkForAdmin = async () => {
+    const web3 = new Web3(connection.provider)
+    const faucetAbs = await FaucetContract(web3)
+    const currentAdmin = (await faucetAbs.methods.admin().call()).toLowerCase()
+    const adminPresent = connection.accounts[0] === currentAdmin
+    if(adminPresent) await refreshPaused(web3, faucetAbs)
+    setIsAdmin(adminPresent)
+  }
+
+  const refreshPaused = async (web3, faucetAbs) => {
+    let newPauseStatus = {}
+    newPauseStatus.subscribe = await faucetAbs.methods.isPaused("subscribe").call()
+    newPauseStatus.timelockToFree = await faucetAbs.methods.isPaused("timelockToFree").call()
+    newPauseStatus.claim = await faucetAbs.methods.isPaused("claim").call()
+    newPauseStatus.resolveEntry = await faucetAbs.methods.isPaused("resolveEntry").call()
+
+    console.log(newPauseStatus)
+
+    setPauseStatus(newPauseStatus)
+  }
+
+  const setPause = async () => {
+    const web3 = new Web3(connection.provider)
+    const faucetAbs = await FaucetContract(web3)
+    let toPause = []
+    let toUnpause = []
+
+    for(let key in pauseStatus) {
+      if(pauseStatus[key] && key === "subscribe") toPause.push("subscribe")
+      else if(pauseStatus[key] && key === "timelockToFree") toPause.push("timelockToFree")
+      else if(pauseStatus[key] && key === "claim") toPause.push("claim")
+      else if(pauseStatus[key] && key === "resolveEntry") toPause.push("resolveEntry")
+    }
+
+    for(let key in pauseStatus) {
+      if(!pauseStatus[key] && key === "subscribe") toUnpause.push("subscribe")
+      else if(!pauseStatus[key] && key === "timelockToFree") toUnpause.push("timelockToFree")
+      else if(!pauseStatus[key] && key === "claim") toUnpause.push("claim")
+      else if(!pauseStatus[key] && key === "resolveEntry") toUnpause.push("resolveEntry")
+    }
+
+    try {
+      await faucetAbs.methods.setPause(true, toPause).send({from: accounts[0]})
+    } catch(err) {
+      console.log(err.message)
+    }
+
+    try {
+      await faucetAbs.methods.setPause(false, toUnpause).send({from: accounts[0]})
+    } catch(err) {
+      console.log(err.message)
+    }
+
+    await refreshPaused(web3, faucetAbs)
+  }
 
   const checkForSubscribe = async (acc, faucetAbs) => {
     const isSubscribed = await faucetAbs.methods.isSubscribed(acc).call()
@@ -160,6 +260,11 @@ export default function Freemoon({ connection }) {
   const subscribe = async () => {
     const web3 = new Web3(connection.provider)
     const faucetAbs = await FaucetContract(web3)
+    const isPaused = await faucetAbs.methods.isPaused("subscribe").call()
+    if(isPaused) {
+      setSubMessage("Subscribing is temporarily paused.")
+      return
+    }
     const isSubscribed = await checkForSubscribe(subAccount, faucetAbs)
     if(isSubscribed) {
       setSubMessage("This address is already subscribed.")
@@ -179,6 +284,12 @@ export default function Freemoon({ connection }) {
   const claim = async () => {
     const web3 = new Web3(connection.provider)
     const faucetAbs = await FaucetContract(web3)
+    const claimPaused = await faucetAbs.methods.isPaused("claim").call()
+    const lotteryPaused = await faucetAbs.methods.isPaused("resolveEntry").call()
+    if(claimPaused || lotteryPaused) {
+      setClaimMessage("Claiming and/or lottery is temporarily paused.")
+      return
+    }
     const isSubscribed = await checkForSubscribe(subAccount, faucetAbs)
     if(!isSubscribed) {
       setClaimMessage("This address is not subscribed.")
@@ -200,22 +311,27 @@ export default function Freemoon({ connection }) {
     }
   }
 
-  const buyFree = async () => {
+  const mintFree = async () => {
     const web3 = new Web3(connection.provider)
     const faucetAbs = await FaucetContract(web3)
+    const isPaused = await faucetAbs.methods.isPaused("timelockToFree").call()
+    if(isPaused) {
+      setMintMessage("Minting FREE is temporarily paused.")
+      return
+    }
     const isSubscribed = await checkForSubscribe(subAccount, faucetAbs)
     if(!isSubscribed) {
-      setBuyMessage("This address is not subscribed.")
+      setMintMessage("This address is not subscribed.")
       return
     }
 
     try {
-      setBuyMessage(LOADING)
+      setMintMessage(LOADING)
       await faucetAbs.methods.timelockToFree().send({value: web3.utils.toWei(String(buyAmount), "ether"), from: accounts[0]})
-      setBuyMessage(SUCCESS)
+      setMintMessage(SUCCESS)
     } catch(err) {
       console.log(err)
-      setBuyMessage(BUY_DEFAULT)
+      setMintMessage(MINT_DEFAULT)
     }
   }
 
@@ -260,9 +376,9 @@ export default function Freemoon({ connection }) {
   if(connection.connected) {
     return (
       <FreemoonContainer>
-        <AddTokens onClick={() => addTokens()}>
-          Add Tokens
-        </AddTokens>
+        <Extras onClick={() => addTokens()}>
+          <FaCoins size={25}/>
+        </Extras>
         <Title>
           Subscribe
         </Title>
@@ -295,28 +411,57 @@ export default function Freemoon({ connection }) {
           {claimMessage}
         </Message>
         <Title>
-          Buy FREE
+          Mint FREE
         </Title>
         <Detail>
-          You can buy FREE with timelock FSN. The current rate is:<br/>
+          You can mint FREE with timelock FSN. The current rate is:<br/>
           1 4-month TL FSN == 50 FREE.
         </Detail>
         <Bar>
           <Input placeholder="Amount of FSN to timelock ..." spellCheck={false} onChange={e => setBuyAmount(e.target.value)}/>
-          <Fill onClick={() => buyFree()}>
+          <Fill onClick={() => mintFree()}>
             <IoTime size="40"/>
           </Fill>
         </Bar>
         <Message>
-          {buyMessage}
+          {mintMessage}
         </Message>
+        <Admin show={isAdmin}>
+          <Title>
+            Pause / Unpause
+          </Title>
+          <Detail>
+            Pause or unpause specific contract functionality. Only accessible to admin address.
+          </Detail>
+          <Options>
+            <Selection>
+              <Checkbox type="checkbox" checked={pauseStatus.subscribe} onChange={e => setPauseStatus(prevState => ({...prevState, subscribe: e.target.checked}))}/>
+              Subscribe
+            </Selection>
+            <Selection>
+              <Checkbox type="checkbox" checked={pauseStatus.timelockToFree} onChange={e => setPauseStatus(prevState => ({...prevState, timelockToFree: e.target.checked}))}/>
+              Mint
+            </Selection>
+            <Selection>
+              <Checkbox type="checkbox" checked={pauseStatus.claim} onChange={e => setPauseStatus(prevState => ({...prevState, claim: e.target.checked}))}/>
+              Claim
+            </Selection>
+            <Selection>
+              <Checkbox type="checkbox" checked={pauseStatus.resolveEntry} onChange={e => setPauseStatus(prevState => ({...prevState, resolveEntry: e.target.checked}))}/>
+              Lottery
+            </Selection>
+            <Extras onClick={() => setPause()}>
+              Update
+            </Extras>
+          </Options>
+        </Admin>
       </FreemoonContainer>
     )
   } else {
     return (
       <FreemoonContainer>
         <Detail>
-            You must connect your MetaMask wallet to use this app.
+          You must connect your MetaMask wallet to use this app.
         </Detail>
       </FreemoonContainer>
     )
