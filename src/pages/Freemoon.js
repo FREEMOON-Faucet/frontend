@@ -18,21 +18,30 @@ const Options = styled.div`
   flex-direction: column;
   justify-content: space-between;
   align-items: center;
-  width: 100%;
+  width: 40%;
   height: 230px;
   margin: 10px 0;
+`
+
+const ExtrasRow = styled.div`
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 80%;
 `
 
 const Extras = styled.div`
   display: flex;
   justify-content: center;
   align-items: center;
-  width: 80%;
-  max-width: 400px;
+  width: 50%;
+  max-width: 250px;
   height: 40px;
+  margin: 0 10px;
   border: 1px solid #000;
   border-radius: 4px;
   font-size: 1.2rem;
+  font-style: italic;
   cursor: ${props => props.checkbox ? "default" : "pointer"};
 `
 
@@ -340,9 +349,9 @@ export default function Freemoon({ connection }) {
     const network = await networkObj(web3)
     try {
       await connection.provider.request({
-        method: 'wallet_watchAsset',
+        method: "wallet_watchAsset",
         params: {
-          type: 'ERC20',
+          type: "ERC20",
           options: {
             address: network.contracts.free,
             symbol: FREE.symbol,
@@ -351,15 +360,15 @@ export default function Freemoon({ connection }) {
           },
         },
       })
-    } catch(error) {
-      console.log(error);
+    } catch(err) {
+      console.log(err.message)
     }
     
     try {
       await connection.provider.request({
-        method: 'wallet_watchAsset',
+        method: "wallet_watchAsset",
         params: {
-          type: 'ERC20',
+          type: "ERC20",
           options: {
             address: network.contracts.freemoon,
             symbol: FMN.symbol,
@@ -368,17 +377,42 @@ export default function Freemoon({ connection }) {
           },
         },
       })
-    } catch(error) {
-      console.log(error);
+    } catch(err) {
+      console.log(err.message)
+    }
+  }
+
+  const addNetworks = async () => {
+    try {
+      await connection.provider.request({
+        method: "wallet_addEthereumChain",
+        params: [{
+          chainId: "0xb660",
+          chainName: "Fusion Testnet",
+          nativeCurrency: {
+            name: "Fusion",
+            symbol: "FSN",
+            decimals: 18
+          },
+          rpcUrls: [ "https://testway.freemoon.xyz/gate" ]
+        }]
+      })
+    } catch(err) {
+      console.log(err.message)
     }
   }
 
   if(connection.connected) {
     return (
       <FreemoonContainer>
-        <Extras onClick={() => addTokens()}>
-          <FaCoins size={25}/>
-        </Extras>
+        <ExtrasRow>
+          <Extras onClick={() => addTokens()}>
+            <FaCoins size={25}/>
+          </Extras>
+          <Extras onClick={() => addNetworks()}>
+            Switch Network
+          </Extras>
+        </ExtrasRow>
         <Title>
           Subscribe
         </Title>
@@ -399,7 +433,7 @@ export default function Freemoon({ connection }) {
         </Title>
         <Detail>
           Here you can claim FREE for a subscribed address.  Claiming is allowed once per hour. Doing so will enter it into the FREEMOON lottery.
-          The lottery category entered is determined by the address' FREE balance.
+          The lottery category entered is determined by the address" FREE balance.
         </Detail>
         <Bar>
           <Input placeholder="Address to claim for ..." spellCheck={false} onChange={e => setClaimAccount(e.target.value)}/>
