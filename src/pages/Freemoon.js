@@ -187,8 +187,7 @@ export default function Freemoon({ connection }) {
   const [ pauseStatus, setPauseStatus ] = useState({
     subscribe: false,
     timelockToFree: false,
-    claim: false,
-    resolveEntry: false
+    claim: false
   })
 
   useEffect(() => {
@@ -204,18 +203,15 @@ export default function Freemoon({ connection }) {
     const faucetAbs = await FaucetContract(web3)
     const currentAdmin = (await faucetAbs.methods.admin().call()).toLowerCase()
     const adminPresent = connection.accounts[0] === currentAdmin
-    if(adminPresent) await refreshPaused(web3, faucetAbs)
+    if(adminPresent) await refreshPaused(faucetAbs)
     setIsAdmin(adminPresent)
   }
 
-  const refreshPaused = async (web3, faucetAbs) => {
+  const refreshPaused = async faucetAbs => {
     let newPauseStatus = {}
     newPauseStatus.subscribe = await faucetAbs.methods.isPaused("subscribe").call()
     newPauseStatus.timelockToFree = await faucetAbs.methods.isPaused("timelockToFree").call()
     newPauseStatus.claim = await faucetAbs.methods.isPaused("claim").call()
-    newPauseStatus.resolveEntry = await faucetAbs.methods.isPaused("resolveEntry").call()
-
-    console.log(newPauseStatus)
 
     setPauseStatus(newPauseStatus)
   }
@@ -230,14 +226,12 @@ export default function Freemoon({ connection }) {
       if(pauseStatus[key] && key === "subscribe") toPause.push("subscribe")
       else if(pauseStatus[key] && key === "timelockToFree") toPause.push("timelockToFree")
       else if(pauseStatus[key] && key === "claim") toPause.push("claim")
-      else if(pauseStatus[key] && key === "resolveEntry") toPause.push("resolveEntry")
     }
 
     for(let key in pauseStatus) {
       if(!pauseStatus[key] && key === "subscribe") toUnpause.push("subscribe")
       else if(!pauseStatus[key] && key === "timelockToFree") toUnpause.push("timelockToFree")
       else if(!pauseStatus[key] && key === "claim") toUnpause.push("claim")
-      else if(!pauseStatus[key] && key === "resolveEntry") toUnpause.push("resolveEntry")
     }
 
     try {
@@ -252,7 +246,7 @@ export default function Freemoon({ connection }) {
       console.log(err.message)
     }
 
-    await refreshPaused(web3, faucetAbs)
+    await refreshPaused(faucetAbs)
   }
 
   const checkForSubscribe = async (acc, faucetAbs) => {
@@ -294,9 +288,8 @@ export default function Freemoon({ connection }) {
     const web3 = new Web3(connection.provider)
     const faucetAbs = await FaucetContract(web3)
     const claimPaused = await faucetAbs.methods.isPaused("claim").call()
-    const lotteryPaused = await faucetAbs.methods.isPaused("resolveEntry").call()
-    if(claimPaused || lotteryPaused) {
-      setClaimMessage("Claiming and/or lottery is temporarily paused.")
+    if(claimPaused) {
+      setClaimMessage("Claiming is temporarily paused.")
       return
     }
     const isSubscribed = await checkForSubscribe(subAccount, faucetAbs)
@@ -315,7 +308,7 @@ export default function Freemoon({ connection }) {
       await faucetAbs.methods.claim(claimAccount).send({from: accounts[0]})
       setClaimMessage(SUCCESS)
     } catch(err) {
-      console.log(err)
+      console.log(err.message)
       setClaimMessage(CLAIM_DEFAULT)
     }
   }
@@ -339,7 +332,7 @@ export default function Freemoon({ connection }) {
       await faucetAbs.methods.timelockToFree().send({value: web3.utils.toWei(String(buyAmount), "ether"), from: accounts[0]})
       setMintMessage(SUCCESS)
     } catch(err) {
-      console.log(err)
+      console.log(err.message)
       setMintMessage(MINT_DEFAULT)
     }
   }
@@ -479,10 +472,6 @@ export default function Freemoon({ connection }) {
             <Selection>
               <Checkbox type="checkbox" checked={pauseStatus.claim} onChange={e => setPauseStatus(prevState => ({...prevState, claim: e.target.checked}))}/>
               Claim
-            </Selection>
-            <Selection>
-              <Checkbox type="checkbox" checked={pauseStatus.resolveEntry} onChange={e => setPauseStatus(prevState => ({...prevState, resolveEntry: e.target.checked}))}/>
-              Lottery
             </Selection>
             <Extras onClick={() => setPause()}>
               Update
