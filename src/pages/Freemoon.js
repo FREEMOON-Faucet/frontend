@@ -188,6 +188,10 @@ export default function Freemoon({ connection }) {
   }
 
   const [ accounts, setAccounts ] = useState("")
+  const [ withdrawal, setWithdrawal ] = useState({
+    recipient: "",
+    amount: 0
+  })
 
   const [ subAccount, setSubAccount ] = useState("")
   const [ claimAccount, setClaimAccount ] = useState("")
@@ -219,12 +223,17 @@ export default function Freemoon({ connection }) {
     const checkForAdminOrGov = async () => {
       const web3 = new Web3(connection.provider)
       const faucetAbs = await FaucetContract(web3)
+
+      const bal = await checkFaucetBal(web3)
+
       const currentAdmin = (await faucetAbs.methods.admin().call()).toLowerCase()
       const currentGov = (await faucetAbs.methods.governance().call()).toLowerCase()
       const adminPresent = connection.accounts[0] === currentAdmin
       const govPresent = connection.accounts[0] === currentGov
+
       if(adminPresent) await refreshPaused(faucetAbs)
-      if(govPresent) await refreshParams(web3, faucetAbs)
+      if(govPresent) await refreshParams(web3, faucetAbs, bal)
+
       setIsAdmin(adminPresent)
       setIsGov(govPresent)
     }
@@ -277,7 +286,7 @@ export default function Freemoon({ connection }) {
     await refreshPaused(faucetAbs)
   }
 
-  const refreshParams = async (web3, faucetAbs) => {
+  const refreshParams = async (web3, faucetAbs, bal) => {
     let newParamStatus = {}
     newParamStatus.admin = (await faucetAbs.methods.admin().call()).toLowerCase()
     newParamStatus.coordinator = (await faucetAbs.methods.coordinator().call()).toLowerCase()
@@ -287,6 +296,7 @@ export default function Freemoon({ connection }) {
     newParamStatus.payoutAmount = Number(web3.utils.fromWei(await faucetAbs.methods.payoutAmount().call()))
     newParamStatus.hotWalletLimit = Number(web3.utils.fromWei(await faucetAbs.methods.hotWalletLimit().call()))
 
+    setWithdrawal(prevState => ({...prevState, amount: bal}))
     setParamStatus(newParamStatus)
   }
 
@@ -319,6 +329,28 @@ export default function Freemoon({ connection }) {
     }
 
     await refreshParams(web3, faucetAbs)
+  }
+
+  const withdraw = async () => {
+    const web3 = new Web3(connection.provider)
+    const faucetAbs = await FaucetContract(web3)
+    const bal = await checkFaucetBal(web3)
+
+    if(withdrawal.amount > bal || withdrawal.amount === 0) {
+      return
+    }
+
+    try {
+      await faucetAbs.methods.withdrawFunds(withdrawal.recipient, web3.utils.toWei(String(withdrawal.amount), "ether")).send({from: connection.accounts[0]})
+    } catch(err) {
+      console.log(err.message)
+    }
+  }
+
+  const checkFaucetBal = async web3 => {
+    const network = await networkObj(web3)
+    const faucetContractBalance = web3.utils.fromWei(await web3.eth.getBalance(network.contracts.faucet))
+    return faucetContractBalance
   }
 
   const checkForSubscribe = async (acc, faucetAbs) => {
@@ -595,6 +627,15 @@ export default function Freemoon({ connection }) {
           <Detail>
             Withdraw Subscription Fees to an external wallet.
           </Detail>
+          <Bar>
+            <Input placeholder="Recipient ..." spellCheck={false} onChange={e => setWithdrawal(prevState => ({...prevState, recipient: e.target.value}))}/>
+          </Bar>
+          <Bar>
+            <Input value={withdrawal.amount} placeholder="Amount ..." spellCheck={false} onChange={e => setWithdrawal(prevState => ({...prevState, amount: e.target.value}))}/>
+          </Bar>
+          <Extras spaceAbove={true} onClick={() => withdraw()}>
+            Withdraw
+          </Extras>
         </AdminGov>
       </FreemoonContainer>
     )
