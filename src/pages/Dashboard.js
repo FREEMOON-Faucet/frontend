@@ -112,12 +112,12 @@ export default function Dashboard({ connection }) {
     fsnReserve: ZERO,
     totalClaims: ZERO
   })
-  const [ fusionMainnet, setFusionMainnet ] = useState({
-    dailyTx: ZERO,
-    dailyFmn: ZERO,
-    totalTx: ZERO,
-    totalFmn: ZERO
-  })
+  // const [ fusionMainnet, setFusionMainnet ] = useState({
+  //   dailyTx: ZERO,
+  //   dailyFmn: ZERO,
+  //   totalTx: ZERO,
+  //   totalFmn: ZERO
+  // })
   const [ latestWin, setLatestWin ] = useState({
     by: "",
     blockHeight: ZERO,
@@ -268,19 +268,31 @@ export default function Dashboard({ connection }) {
             <Detail>Fusion Mainnet</Detail>
             <Row>
               <Label>Daily Tx's</Label>
-              <Number>{fusionMainnet.dailyTx.toString()}</Number>
+              <Number>
+                {/* {fusionMainnet.dailyTx.toString()} */}
+                0
+              </Number>
             </Row>
             <Row>
               <Label>FREEMOON</Label>
-              <Number>{fusionMainnet.dailyFmn.toString()}%</Number>
+              <Number>
+                {/* {fusionMainnet.dailyFmn.toString()}% */}
+                0
+              </Number>
             </Row>
             <Row>
               <Label>Total Tx's</Label>
-              <Number>{fusionMainnet.totalTx.toString()}</Number>
+              <Number>
+                {/* {fusionMainnet.totalTx.toString()} */}
+                0
+              </Number>
             </Row>
             <Row>
               <Label>FREEMOON</Label>
-              <Number>{fusionMainnet.totalFmn.toString()}%</Number>
+              <Number>
+                {/* {fusionMainnet.totalFmn.toString()}% */}
+                0
+              </Number>
             </Row>
           </Box>
           <Box>

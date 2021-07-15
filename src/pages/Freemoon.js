@@ -3,6 +3,7 @@ import styled from "styled-components"
 import { IoWallet, IoDice, IoTime } from "react-icons/io5"
 import { FaCoins } from "react-icons/fa"
 import Web3 from "web3"
+// import BigNumber from "bignumber.js"
 
 import { FaucetContract, networkObj } from "../utils/contracts"
 
@@ -37,7 +38,10 @@ const Extras = styled.div`
   width: 50%;
   max-width: 250px;
   height: 40px;
-  margin: 0 10px;
+  margin-right: 10px;
+  margin-left: 10px;
+  margin-top: ${props => props.spaceAbove ? "10px" : "0"};
+  margin-bottom: ${props => props.spaceAbove ? "25px" : "0"};
   border: 1px solid #000;
   border-radius: 4px;
   font-size: 1.2rem;
@@ -140,12 +144,20 @@ const Message = styled.div`
   margin-bottom: 40px; 
 `
 
+const SubMessage = styled.div`
+  width: 80%;
+  font-size: 1rem;
+  font-style: italic;
+  text-align: center;
+  margin-top: 5px;
+`
+
 const AdminGov = styled.div`
   display: ${props => props.show ? "flex" : "none"};
   flex-direction: column;
   align-items: center;
   width: 100%;
-  border: 2px solid orange;
+  border: 2px solid #92b4e3;
 `
 
 const Checkbox = styled.input`
@@ -156,6 +168,8 @@ const Checkbox = styled.input`
 
 
 export default function Freemoon({ connection }) {
+
+  // const ZERO = BigNumber("0")
 
   const SUB_DEFAULT = "Connect wallet or input address to subscribe."
   const CLAIM_DEFAULT = "Input address to claim for."
@@ -184,34 +198,48 @@ export default function Freemoon({ connection }) {
   const [ mintMessage, setMintMessage ] = useState(MINT_DEFAULT)
 
   const [ isAdmin, setIsAdmin ] = useState(false)
+  const [ isGov, setIsGov ] = useState(false)
+
   const [ pauseStatus, setPauseStatus ] = useState({
     subscribe: false,
-    timelockToFree: false,
-    claim: false
+    claim: false,
+    timelockToFree: false
+  })
+  const [ paramStatus, setParamStatus ] = useState({
+    admin: "",
+    coordinator: "",
+    subscriptionCost: 0,
+    cooldownTime: 0,
+    payoutThreshold: 0,
+    payoutAmount: 0,
+    hotWalletLimit: 0
   })
 
   useEffect(() => {
+    const checkForAdminOrGov = async () => {
+      const web3 = new Web3(connection.provider)
+      const faucetAbs = await FaucetContract(web3)
+      const currentAdmin = (await faucetAbs.methods.admin().call()).toLowerCase()
+      const currentGov = (await faucetAbs.methods.governance().call()).toLowerCase()
+      const adminPresent = connection.accounts[0] === currentAdmin
+      const govPresent = connection.accounts[0] === currentGov
+      if(adminPresent) await refreshPaused(faucetAbs)
+      if(govPresent) await refreshParams(web3, faucetAbs)
+      setIsAdmin(adminPresent)
+      setIsGov(govPresent)
+    }
     if(connection.connected) {
       setAccounts(connection.accounts)
       setSubAccount(connection.accounts[0])
-      checkForAdmin()
+      checkForAdminOrGov()
     }
   }, [ connection ])
-
-  const checkForAdmin = async () => {
-    const web3 = new Web3(connection.provider)
-    const faucetAbs = await FaucetContract(web3)
-    const currentAdmin = (await faucetAbs.methods.admin().call()).toLowerCase()
-    const adminPresent = connection.accounts[0] === currentAdmin
-    if(adminPresent) await refreshPaused(faucetAbs)
-    setIsAdmin(adminPresent)
-  }
 
   const refreshPaused = async faucetAbs => {
     let newPauseStatus = {}
     newPauseStatus.subscribe = await faucetAbs.methods.isPaused("subscribe").call()
-    newPauseStatus.timelockToFree = await faucetAbs.methods.isPaused("timelockToFree").call()
     newPauseStatus.claim = await faucetAbs.methods.isPaused("claim").call()
+    newPauseStatus.timelockToFree = await faucetAbs.methods.isPaused("timelockToFree").call()
 
     setPauseStatus(newPauseStatus)
   }
@@ -224,14 +252,14 @@ export default function Freemoon({ connection }) {
 
     for(let key in pauseStatus) {
       if(pauseStatus[key] && key === "subscribe") toPause.push("subscribe")
-      else if(pauseStatus[key] && key === "timelockToFree") toPause.push("timelockToFree")
       else if(pauseStatus[key] && key === "claim") toPause.push("claim")
+      else if(pauseStatus[key] && key === "timelockToFree") toPause.push("timelockToFree")
     }
 
     for(let key in pauseStatus) {
       if(!pauseStatus[key] && key === "subscribe") toUnpause.push("subscribe")
-      else if(!pauseStatus[key] && key === "timelockToFree") toUnpause.push("timelockToFree")
       else if(!pauseStatus[key] && key === "claim") toUnpause.push("claim")
+      else if(!pauseStatus[key] && key === "timelockToFree") toUnpause.push("timelockToFree")
     }
 
     try {
@@ -247,6 +275,50 @@ export default function Freemoon({ connection }) {
     }
 
     await refreshPaused(faucetAbs)
+  }
+
+  const refreshParams = async (web3, faucetAbs) => {
+    let newParamStatus = {}
+    newParamStatus.admin = (await faucetAbs.methods.admin().call()).toLowerCase()
+    newParamStatus.coordinator = (await faucetAbs.methods.coordinator().call()).toLowerCase()
+    newParamStatus.subscriptionCost = Number(web3.utils.fromWei(await faucetAbs.methods.subscriptionCost().call()))
+    newParamStatus.cooldownTime = Number(await faucetAbs.methods.cooldownTime().call())
+    newParamStatus.payoutThreshold = Number(await faucetAbs.methods.payoutThreshold().call())
+    newParamStatus.payoutAmount = Number(web3.utils.fromWei(await faucetAbs.methods.payoutAmount().call()))
+    newParamStatus.hotWalletLimit = Number(web3.utils.fromWei(await faucetAbs.methods.hotWalletLimit().call()))
+
+    setParamStatus(newParamStatus)
+  }
+
+  const setParams = async () => {
+    const web3 = new Web3(connection.provider)
+    const faucetAbs = await FaucetContract(web3)
+
+    const {
+      admin,
+      coordinator,
+      subscriptionCost,
+      cooldownTime,
+      payoutThreshold,
+      payoutAmount,
+      hotWalletLimit
+    } = paramStatus
+
+    try {
+      await faucetAbs.methods.updateParams(
+        admin,
+        coordinator,
+        web3.utils.toWei(String(subscriptionCost), "ether"),
+        String(cooldownTime),
+        String(payoutThreshold),
+        web3.utils.toWei(String(payoutAmount), "ether"),
+        web3.utils.toWei(String(hotWalletLimit), "ether")
+      ).send({from: connection.accounts[0]})
+    } catch(err) {
+      console.log(err.message)
+    }
+
+    await refreshParams(web3, faucetAbs)
   }
 
   const checkForSubscribe = async (acc, faucetAbs) => {
@@ -265,7 +337,7 @@ export default function Freemoon({ connection }) {
     const faucetAbs = await FaucetContract(web3)
     const isPaused = await faucetAbs.methods.isPaused("subscribe").call()
     if(isPaused) {
-      setSubMessage("Subscribing is temporarily paused.")
+      setSubMessage("Subscribing is currently paused.")
       return
     }
     const isSubscribed = await checkForSubscribe(subAccount, faucetAbs)
@@ -273,10 +345,11 @@ export default function Freemoon({ connection }) {
       setSubMessage("This address is already subscribed.")
       return
     }
+    const cost = await faucetAbs.methods.subscriptionCost().call()
 
     try {
       setSubMessage(LOADING)
-      await faucetAbs.methods.subscribe(subAccount).send({value: web3.utils.toWei("1", "ether"), from: accounts[0]})
+      await faucetAbs.methods.subscribe(subAccount).send({value: cost, from: accounts[0]})
       setSubMessage(SUCCESS)
     } catch(err) {
       console.log(err.message)
@@ -289,15 +362,15 @@ export default function Freemoon({ connection }) {
     const faucetAbs = await FaucetContract(web3)
     const claimPaused = await faucetAbs.methods.isPaused("claim").call()
     if(claimPaused) {
-      setClaimMessage("Claiming is temporarily paused.")
+      setClaimMessage("Claiming is currently paused.")
       return
     }
-    const isSubscribed = await checkForSubscribe(subAccount, faucetAbs)
+    const isSubscribed = await checkForSubscribe(claimAccount, faucetAbs)
     if(!isSubscribed) {
       setClaimMessage("This address is not subscribed.")
       return
     }
-    const nextEntry = await checkCooldownTime(subAccount, faucetAbs)
+    const nextEntry = await checkCooldownTime(claimAccount, faucetAbs)
     if(nextEntry > Date.now()/1000) {
       setClaimMessage(`This address has claimed in the last hour. Next claim available at: ${new Date(nextEntry*1000).toUTCString()}`)
       return
@@ -318,10 +391,10 @@ export default function Freemoon({ connection }) {
     const faucetAbs = await FaucetContract(web3)
     const isPaused = await faucetAbs.methods.isPaused("timelockToFree").call()
     if(isPaused) {
-      setMintMessage("Minting FREE is temporarily paused.")
+      setMintMessage("Minting FREE is currently paused.")
       return
     }
-    const isSubscribed = await checkForSubscribe(subAccount, faucetAbs)
+    const isSubscribed = await checkForSubscribe(accounts[0], faucetAbs)
     if(!isSubscribed) {
       setMintMessage("This address is not subscribed.")
       return
@@ -466,28 +539,62 @@ export default function Freemoon({ connection }) {
               Subscribe
             </Selection>
             <Selection>
-              <Checkbox type="checkbox" checked={pauseStatus.timelockToFree} onChange={e => setPauseStatus(prevState => ({...prevState, timelockToFree: e.target.checked}))}/>
-              Mint
-            </Selection>
-            <Selection>
               <Checkbox type="checkbox" checked={pauseStatus.claim} onChange={e => setPauseStatus(prevState => ({...prevState, claim: e.target.checked}))}/>
               Claim
+            </Selection>
+            <Selection>
+              <Checkbox type="checkbox" checked={pauseStatus.timelockToFree} onChange={e => setPauseStatus(prevState => ({...prevState, timelockToFree: e.target.checked}))}/>
+              Mint
             </Selection>
             <Extras onClick={() => setPause()}>
               Update
             </Extras>
           </Options>
         </AdminGov>
-        <AdminGov>
+        <AdminGov show={isGov}>
           <Title>
             Update Faucet Settings
           </Title>
           <Detail>
             Update settings which determine how the faucet operates. Only accessible to governance address.
           </Detail>
-          <Options>
-            
-          </Options>
+          <Bar>
+            <Input value={paramStatus.admin} placeholder="New Admin Address ..." spellCheck={false} onChange={e => setParamStatus(prevState => ({...prevState, admin: e.target.value}))}/>
+          </Bar>
+          <SubMessage>Admin</SubMessage>
+          <Bar>
+            <Input value={paramStatus.coordinator} placeholder="New Coordinator Address ..." spellCheck={false} onChange={e => setParamStatus(prevState => ({...prevState, coordinator: e.target.value}))}/>
+          </Bar>
+          <SubMessage>Coordinator</SubMessage>
+          <Bar>
+            <Input value={paramStatus.subscriptionCost} placeholder="New Subscription Cost ..." spellCheck={false} onChange={e => setParamStatus(prevState => ({...prevState, subscriptionCost: e.target.value}))}/>
+          </Bar>
+          <SubMessage>Subscription Cost (FSN)</SubMessage>
+          <Bar>
+            <Input value={paramStatus.cooldownTime} placeholder="New Cooldown Time ..." spellCheck={false} onChange={e => setParamStatus(prevState => ({...prevState, cooldownTime: e.target.value}))}/>
+          </Bar>
+          <SubMessage>Cooldown Time (sec)</SubMessage>
+          <Bar>
+            <Input value={paramStatus.payoutThreshold} placeholder="New Payout Threshold ..." spellCheck={false} onChange={e => setParamStatus(prevState => ({...prevState, payoutThreshold: e.target.value}))}/>
+          </Bar>
+          <SubMessage>Payout Threshold</SubMessage>
+          <Bar>
+            <Input value={paramStatus.payoutAmount} placeholder="New Payout Amount ..." spellCheck={false} onChange={e => setParamStatus(prevState => ({...prevState, payoutAmount: e.target.value}))}/>
+          </Bar>
+          <SubMessage>Payout Amount (FREE)</SubMessage>
+          <Bar>
+            <Input value={paramStatus.hotWalletLimit} placeholder="New Hot Wallet Limit ..." spellCheck={false} onChange={e => setParamStatus(prevState => ({...prevState, hotWalletLimit: e.target.value}))}/>
+          </Bar>
+          <SubMessage>Hot Wallet Limit (FSN)</SubMessage>
+          <Extras spaceAbove={true} onClick={() => setParams()}>
+            Update
+          </Extras>
+          <Title>
+            Withdraw Funds
+          </Title>
+          <Detail>
+            Withdraw Subscription Fees to an external wallet.
+          </Detail>
         </AdminGov>
       </FreemoonContainer>
     )
