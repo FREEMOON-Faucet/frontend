@@ -174,6 +174,7 @@ export default function Freemoon({ connection }) {
   const SUB_DEFAULT = "Connect wallet or input address to subscribe."
   const CLAIM_DEFAULT = "Input address to claim for."
   const MINT_DEFAULT = "Enter amount of FSN to timelock."
+  const WITHDRAW_DEFAULT = "Enter amount of FSN to withdraw from available funds."
   const LOADING = "Please wait ..."
   const SUCCESS = "Success!"
   const FREE = {
@@ -200,6 +201,7 @@ export default function Freemoon({ connection }) {
   const [ subMessage, setSubMessage ] = useState(SUB_DEFAULT)
   const [ claimMessage, setClaimMessage ] = useState(CLAIM_DEFAULT)
   const [ mintMessage, setMintMessage ] = useState(MINT_DEFAULT)
+  const [ withdrawMessage, setWithdrawMessage ] = useState(WITHDRAW_DEFAULT)
 
   const [ isAdmin, setIsAdmin ] = useState(false)
   const [ isGov, setIsGov ] = useState(false)
@@ -336,12 +338,19 @@ export default function Freemoon({ connection }) {
     const faucetAbs = await FaucetContract(web3)
     const bal = await checkFaucetBal(web3)
 
-    if(withdrawal.amount > bal || withdrawal.amount === 0) {
+    if(withdrawal.amount > bal) {
+      setWithdrawMessage(`Amount exceeds balance. ${bal} FSN available.`)
+      return
+    }
+
+    if(withdrawal.amount === "0") {
+      setWithdrawMessage("Cannot withdraw zero.")
       return
     }
 
     try {
       await faucetAbs.methods.withdrawFunds(withdrawal.recipient, web3.utils.toWei(String(withdrawal.amount), "ether")).send({from: connection.accounts[0]})
+      await refreshParams(web3, faucetAbs)
     } catch(err) {
       console.log(err.message)
     }
@@ -633,6 +642,9 @@ export default function Freemoon({ connection }) {
           <Bar>
             <Input value={withdrawal.amount} placeholder="Amount ..." spellCheck={false} onChange={e => setWithdrawal(prevState => ({...prevState, amount: e.target.value}))}/>
           </Bar>
+          <SubMessage>
+            {withdrawMessage}
+          </SubMessage>
           <Extras spaceAbove={true} onClick={() => withdraw()}>
             Withdraw
           </Extras>
