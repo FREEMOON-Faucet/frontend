@@ -140,7 +140,7 @@ const Message = styled.div`
   margin-bottom: 40px; 
 `
 
-const Admin = styled.div`
+const AdminGov = styled.div`
   display: ${props => props.show ? "flex" : "none"};
   flex-direction: column;
   align-items: center;
@@ -453,7 +453,7 @@ export default function Freemoon({ connection }) {
         <Message>
           {mintMessage}
         </Message>
-        <Admin show={isAdmin}>
+        <AdminGov show={isAdmin}>
           <Title>
             Pause / Unpause
           </Title>
@@ -477,7 +477,18 @@ export default function Freemoon({ connection }) {
               Update
             </Extras>
           </Options>
-        </Admin>
+        </AdminGov>
+        <AdminGov>
+          <Title>
+            Update Faucet Settings
+          </Title>
+          <Detail>
+            Update settings which determine how the faucet operates. Only accessible to governance address.
+          </Detail>
+          <Options>
+            
+          </Options>
+        </AdminGov>
       </FreemoonContainer>
     )
   } else {
