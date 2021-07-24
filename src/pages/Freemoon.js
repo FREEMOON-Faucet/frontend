@@ -3,7 +3,6 @@ import styled from "styled-components"
 import { IoWallet, IoDice, IoTime } from "react-icons/io5"
 import { FaCoins } from "react-icons/fa"
 import Web3 from "web3"
-// import BigNumber from "bignumber.js"
 
 import { FaucetContract, networkObj } from "../utils/contracts"
 

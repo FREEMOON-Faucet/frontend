@@ -94,7 +94,7 @@ function App() {
   const [ provider, setProvider ] = useState({})
   const [ connected, setConnected ] = useState(false)
 
-  const [ active, setActive ] = useState(2)
+  const [ active, setActive ] = useState(3)
 
   const connect = async () => {
     const ethereum = window.ethereum
@@ -141,7 +141,7 @@ function App() {
         <Tab active={active === 0} onClick={() => setActive(0)}>Dashboard</Tab>
         <Tab active={active === 1} onClick={() => setActive(1)}>Gas Faucet</Tab>
         <Tab active={active === 2} onClick={() => setActive(2)}>FREEMOON Faucet</Tab>
-        <Tab active={active === 3} onClick={() => setActive(3)}>Your Statistics</Tab>
+        <Tab active={active === 3} onClick={() => setActive(3)}>Airdrops</Tab>
         <Tab active={active === 4} onClick={() => setActive(4)}>Bot Army</Tab>
         <Tab active={false} wallet={true} connected={accounts.length > 0} onClick={() => checkConnect() ? connect() : ""}><FaPlug size={25}/></Tab>
       </Nav>
