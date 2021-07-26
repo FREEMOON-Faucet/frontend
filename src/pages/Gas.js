@@ -131,14 +131,13 @@ export default function Gas({ provider }) {
       </Detail>
       <Bar>
         <Input placeholder="Your Fusion address ..." defaultValue={address} onChange={e => setAddress(e.target.value)} spellCheck={false}/>
-        <Fill onClick={() => validate()}>
+        <Fill onClick={() => address ? validate() : ""}>
           <RiGasStationFill size="40"/>
         </Fill>
       </Bar>
       <Message>
         {message}
       </Message>
-
     </GasContainer>
   )
 }

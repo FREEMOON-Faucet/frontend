@@ -168,8 +168,6 @@ const Checkbox = styled.input`
 
 export default function Freemoon({ connection }) {
 
-  // const ZERO = BigNumber("0")
-
   const SUB_DEFAULT = "Connect wallet or input address to subscribe."
   const CLAIM_DEFAULT = "Input address to claim for."
   const MINT_DEFAULT = "Enter amount of FSN to timelock."
@@ -350,6 +348,7 @@ export default function Freemoon({ connection }) {
     try {
       await faucetAbs.methods.withdrawFunds(withdrawal.recipient, web3.utils.toWei(String(withdrawal.amount), "ether")).send({from: connection.accounts[0]})
       await refreshParams(web3, faucetAbs)
+      setWithdrawMessage(SUCCESS)
     } catch(err) {
       console.log(err.message)
     }
@@ -527,7 +526,7 @@ export default function Freemoon({ connection }) {
         </Detail>
         <Bar>
           <Input placeholder="Address to subscribe ..." defaultValue={accounts[0]} spellCheck={false} onChange={e => setSubAccount(e.target.value)}/>
-          <Fill onClick={() => subscribe()}>
+          <Fill onClick={() => subAccount ? subscribe() : ""}>
             <IoWallet size="40"/>
           </Fill>
         </Bar>
@@ -543,7 +542,7 @@ export default function Freemoon({ connection }) {
         </Detail>
         <Bar>
           <Input placeholder="Address to claim for ..." spellCheck={false} onChange={e => setClaimAccount(e.target.value)}/>
-          <Fill onClick={() => claim()}>
+          <Fill onClick={() => claimAccount ? claim() : ""}>
             <IoDice size="40"/>
           </Fill>
         </Bar>
@@ -559,7 +558,7 @@ export default function Freemoon({ connection }) {
         </Detail>
         <Bar>
           <Input placeholder="Amount of FSN to timelock ..." spellCheck={false} onChange={e => setBuyAmount(e.target.value)}/>
-          <Fill onClick={() => mintFree()}>
+          <Fill onClick={() => buyAmount ? mintFree() : ""}>
             <IoTime size="40"/>
           </Fill>
         </Bar>
