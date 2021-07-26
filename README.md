@@ -18,6 +18,6 @@ This app is in development and as such, not all features you see are available a
 To use testnet, add the network to MetaMask:
 
 - Fusion Testnet
-- https://testway.freemoon.xyz/api
+- https://testway.freemoon.xyz/gate
 - 46688 *or* 0xB660
 - FSN
