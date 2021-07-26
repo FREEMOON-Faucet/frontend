@@ -163,6 +163,16 @@ export default function Dashboard({ connection }) {
     const gasFund = web3.utils.fromWei(await web3.eth.getBalance(await faucet.methods.coordinator().call()))
     const fsnReserve = web3.utils.fromWei(await web3.eth.getBalance(network.contracts.faucet))
     const totalClaims = await faucet.methods.claims().call()
+    // const gasFund = 12
+    // const fsnReserve = 12
+
+    console.log(`
+      Subscribers: ${subscribers.toString()},
+      Gas Fund: ${gasFund},
+      FSN Reserve: ${fsnReserve},
+      Total Claims: ${totalClaims.toString()}
+    `)
+
     setFreemoonFaucet({
       subscribers,
       gasFund,
