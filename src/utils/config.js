@@ -22,10 +22,13 @@ const config = {
       name: "Fusion Testnet",
       id: 46688,
       contracts: {
-        free: "0xeFb4859410D57fF9a0f01E696A0E7e06Ebde020E",
-        freemoon: "0x8916fdDd7181D36a8A0deC81b2BDc32164A47DE3",
-        faucet: "0x77aE9d69A428AcdB88dbcDA41f35fD910F1D40d7",
-        airdrop: ""
+        free: "0x2DB153F1DE733d6e5D8875d243924f277Fa4313a",
+        freemoon: "0xC0C3b04afAde71b9074aCE13Ee5403F61c52e66F",
+        faucet: "0xA648b9090fc146D96f80eE43879C349FE66e57b7",
+        airdrop: "0x610Eaf465a12c427a6ed930d8E2ccD00A9a1981c",
+        chng: "0xf7eD89b804CC22Cb188986Eeb6D5F01d522d5138",
+        any: "0x8B0Cb6c96522a5e27466808D6992838044ae7192",
+        fsnFuse: "0x2ac2055cea2FDc44850F7fE52EAFD18e64a77984"
       }
     },
     fsnMainnet: {
@@ -35,6 +38,16 @@ const config = {
         free: "",
         freemoon: "",
         faucet: "",
+        airdrop: ""
+      }
+    },
+    fsnTestnetOld: {
+      name: "Fusion Testnet Old",
+      id: 46688,
+      contracts: {
+        free: "0xeFb4859410D57fF9a0f01E696A0E7e06Ebde020E",
+        freemoon: "0x8916fdDd7181D36a8A0deC81b2BDc32164A47DE3",
+        faucet: "0x77aE9d69A428AcdB88dbcDA41f35fD910F1D40d7",
         airdrop: ""
       }
     }
