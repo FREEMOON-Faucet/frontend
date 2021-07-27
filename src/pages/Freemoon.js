@@ -1,16 +1,21 @@
 import { useState, useEffect } from "react"
 import styled from "styled-components"
 import { IoWallet, IoDice, IoTime } from "react-icons/io5"
-import { FaCoins } from "react-icons/fa"
 import Web3 from "web3"
 
 import { FaucetContract, networkObj } from "../utils/contracts"
+import metamask from "../icons/metamaskcoins.svg"
 
 const FreemoonContainer = styled.div`
   display: flex;
   flex-direction: column;
   align-items: center;
   width: 100%;
+`
+
+const MetaMask = styled.img`
+  width: 100%;
+  max-width: 180px;
 `
 
 const Options = styled.div`
@@ -174,15 +179,16 @@ export default function Freemoon({ connection }) {
   const WITHDRAW_DEFAULT = "Enter amount of FSN to withdraw from available funds."
   const LOADING = "Please wait ..."
   const SUCCESS = "Success!"
+
   const FREE = {
     symbol: "FREE",
     decimals: 18,
-    image: "https://freemoon.xyz/free-icons/android-chrome-512x512.png"
+    image: "https://freemoon.xyz/icons/free.png"
   }
   const FMN = {
     symbol: "FMN",
     decimals: 18,
-    image: "https://freemoon.xyz/freemoon-icons/android-chrome-512x512.png"
+    image: "https://freemoon.xyz/icons/fmn.png"
   }
   const CHNG = {
     symbol: "CHNG",
@@ -579,7 +585,7 @@ export default function Freemoon({ connection }) {
       <FreemoonContainer>
         <ExtrasRow>
           <Extras onClick={() => addTokens()}>
-            <FaCoins size={25}/>
+            <MetaMask src={metamask}/>
           </Extras>
           <Extras onClick={() => addNetworks()}>
             Connect to Fusion
