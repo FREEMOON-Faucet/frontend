@@ -1,10 +1,13 @@
 import { useState, useEffect } from "react"
 import styled from "styled-components"
-import { IoWallet, IoDice, IoTime } from "react-icons/io5"
+import { IoTime } from "react-icons/io5"
 import Web3 from "web3"
 
 import { FaucetContract, networkObj } from "../utils/contracts"
-import metamask from "../icons/metamaskcoins.svg"
+
+import metamaskIcon from "../icons/metamaskcoins.svg"
+import subscribeIcon from "../icons/subscribe.svg"
+import claimIcon from "../icons/claim.svg"
 
 const FreemoonContainer = styled.div`
   display: flex;
@@ -16,6 +19,11 @@ const FreemoonContainer = styled.div`
 const MetaMask = styled.img`
   width: 100%;
   max-width: 180px;
+`
+
+const Icon = styled.img`
+  width: 50%;
+  max-width: 60px;
 `
 
 const Options = styled.div`
@@ -33,6 +41,11 @@ const ExtrasRow = styled.div`
   justify-content: center;
   align-items: center;
   width: 80%;
+  margin-bottom: 10px;
+
+  @media screen and (orientation: portrait) {
+    flex-direction: column;
+  }
 `
 
 const Extras = styled.div`
@@ -40,8 +53,8 @@ const Extras = styled.div`
   justify-content: center;
   align-items: center;
   width: 50%;
-  max-width: 250px;
-  height: 40px;
+  max-width: 400px;
+  height: 50px;
   margin-right: 10px;
   margin-left: 10px;
   margin-top: ${props => props.spaceAbove ? "10px" : "0"};
@@ -50,7 +63,14 @@ const Extras = styled.div`
   border-radius: 4px;
   font-size: 1.2rem;
   font-style: italic;
+  text-align: center;
   cursor: ${props => props.checkbox ? "default" : "pointer"};
+
+  @media screen and (orientation: portrait) {
+    width: 100%;
+    max-width: 650px;
+    margin-top: 4px;
+  }
 `
 
 const Selection = styled.div`
@@ -93,7 +113,7 @@ const Bar = styled.div`
   align-items: center;
   width: 60%;
   max-width: 650px;
-  height: 40px;
+  height: 80px;
   margin-top: 20px;
 
   @media screen and (orientation: portrait) {
@@ -125,8 +145,8 @@ const Fill = styled.div`
   display: flex;
   justify-content: center;
   align-items: center;
-  width: 60px;
-  height: 40px;
+  width: ${props => props.single ? "80%" : "60px"};
+  height: ${props => props.single ? "80px" : "40px"};
   margin: 0;
   border: 2px solid black;
   border-radius: 4px;
@@ -145,7 +165,7 @@ const Message = styled.div`
   font-style: italic;
   text-align: center;
   margin-top: 10px;
-  margin-bottom: 40px; 
+  margin-bottom: 20px; 
 `
 
 const SubMessage = styled.div`
@@ -173,8 +193,8 @@ const Checkbox = styled.input`
 
 export default function Freemoon({ connection }) {
 
-  const SUB_DEFAULT = "Connect wallet or input address to subscribe."
-  const CLAIM_DEFAULT = "Input address to claim for."
+  const SUB_DEFAULT = "Subscribe connected address."
+  const CLAIM_DEFAULT = "Claim FREE for connected address."
   const MINT_DEFAULT = "Enter amount of FSN to timelock."
   const WITHDRAW_DEFAULT = "Enter amount of FSN to withdraw from available funds."
   const LOADING = "Please wait ..."
@@ -260,6 +280,7 @@ export default function Freemoon({ connection }) {
     if(connection.connected) {
       setAccounts(connection.accounts)
       setSubAccount(connection.accounts[0])
+      setClaimAccount(connection.accounts[0])
       checkForAdminOrGov()
     }
   }, [ connection ])
@@ -474,89 +495,56 @@ export default function Freemoon({ connection }) {
     const web3 = new Web3(connection.provider)
     const network = await networkObj(web3)
 
-    try {
-      await connection.provider.request({
-        method: "wallet_watchAsset",
-        params: {
-          type: "ERC20",
-          options: {
-            address: network.contracts.free,
-            symbol: FREE.symbol,
-            decimals: FREE.decimals,
-            image: FREE.image,
+    const tokens = [
+      {
+        address: network.contracts.free,
+        symbol: FREE.symbol,
+        decimals: FREE.decimals,
+        image: FREE.image
+      },
+      {
+        address: network.contracts.freemoon,
+        symbol: FMN.symbol,
+        decimals: FMN.decimals,
+        image: FMN.image
+      },
+      {
+        address: network.contracts.chng,
+        symbol: CHNG.symbol,
+        decimals: CHNG.decimals,
+        image: CHNG.image
+      },
+      {
+        address: network.contracts.any,
+        symbol: ANY.symbol,
+        decimals: ANY.decimals,
+        image: ANY.image
+      },
+      {
+        address: network.contracts.fsnFuse,
+        symbol: FSNFUSE.symbol,
+        decimals: FSNFUSE.decimals,
+        image: FSNFUSE.image
+      }
+    ]
+
+    for(let i = 0; i < tokens.length; i++) {
+      try {
+        await connection.provider.request({
+          method: "wallet_watchAsset",
+          params: {
+            type: "ERC20",
+            options: {
+              address: tokens[i].address,
+              symbol: tokens[i].symbol,
+              decimals: tokens[i].decimals,
+              image: tokens[i].image
+            }
           },
-        },
-      })
-    } catch(err) {
-      console.log(err.message)
-    }
-    
-    try {
-      await connection.provider.request({
-        method: "wallet_watchAsset",
-        params: {
-          type: "ERC20",
-          options: {
-            address: network.contracts.freemoon,
-            symbol: FMN.symbol,
-            decimals: FMN.decimals,
-            image: FMN.image,
-          },
-        },
-      })
-    } catch(err) {
-      console.log(err.message)
-    }
-    
-    try {
-      await connection.provider.request({
-        method: "wallet_watchAsset",
-        params: {
-          type: "ERC20",
-          options: {
-            address: network.contracts.chng,
-            symbol: CHNG.symbol,
-            decimals: CHNG.decimals,
-            image: CHNG.image,
-          },
-        },
-      })
-    } catch(err) {
-      console.log(err.message)
-    }
-    
-    try {
-      await connection.provider.request({
-        method: "wallet_watchAsset",
-        params: {
-          type: "ERC20",
-          options: {
-            address: network.contracts.any,
-            symbol: ANY.symbol,
-            decimals: ANY.decimals,
-            image: ANY.image,
-          },
-        },
-      })
-    } catch(err) {
-      console.log(err.message)
-    }
-    
-    try {
-      await connection.provider.request({
-        method: "wallet_watchAsset",
-        params: {
-          type: "ERC20",
-          options: {
-            address: network.contracts.fsnFuse,
-            symbol: FSNFUSE.symbol,
-            decimals: FSNFUSE.decimals,
-            image: FSNFUSE.image,
-          },
-        },
-      })
-    } catch(err) {
-      console.log(err.message)
+        })
+      } catch(err) {
+        console.log(err.message)
+      }
     }
   }
 
@@ -585,7 +573,7 @@ export default function Freemoon({ connection }) {
       <FreemoonContainer>
         <ExtrasRow>
           <Extras onClick={() => addTokens()}>
-            <MetaMask src={metamask}/>
+            <MetaMask src={metamaskIcon} alt="Add Tokens"/>
           </Extras>
           <Extras onClick={() => addNetworks()}>
             Connect to Fusion
@@ -594,13 +582,9 @@ export default function Freemoon({ connection }) {
         <Title>
           Subscribe
         </Title>
-        <Detail>
-          Here you can subscribe addresses to the FREEMOON Faucet. Subscribing an address allows it to enter the FREEMOON lottery once every hour.
-        </Detail>
         <Bar>
-          <Input placeholder="Address to subscribe ..." defaultValue={accounts[0]} spellCheck={false} onChange={e => setSubAccount(e.target.value)}/>
-          <Fill onClick={() => subAccount ? subscribe() : ""}>
-            <IoWallet size="40"/>
+          <Fill onClick={() => subAccount ? subscribe() : ""} single={true}>
+            <Icon src={subscribeIcon} alt="Subscribe"/>
           </Fill>
         </Bar>
         <Message>
@@ -609,14 +593,9 @@ export default function Freemoon({ connection }) {
         <Title>
           Claim FREE
         </Title>
-        <Detail>
-          Here you can claim FREE for a subscribed address.  Claiming is allowed once per hour. Doing so will enter it into the FREEMOON lottery.
-          The lottery category entered is determined by the address" FREE balance.
-        </Detail>
         <Bar>
-          <Input placeholder="Address to claim for ..." spellCheck={false} onChange={e => setClaimAccount(e.target.value)}/>
-          <Fill onClick={() => claimAccount ? claim() : ""}>
-            <IoDice size="40"/>
+          <Fill onClick={() => claimAccount ? claim() : ""} single={true}>
+            <Icon src={claimIcon} alt="Claim"/>
           </Fill>
         </Bar>
         <Message>
