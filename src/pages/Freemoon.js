@@ -187,17 +187,17 @@ export default function Freemoon({ connection }) {
   const CHNG = {
     symbol: "CHNG",
     decimals: 18,
-    image: "http://localhost:3000/icons/chng.png"
+    image: "https://freemoon.xyz/icons/chng.png"
   }
   const ANY = {
     symbol: "ANY",
     decimals: 18,
-    image: "http://localhost:3000/icons/any.png"
+    image: "https://freemoon.xyz/icons/any.png"
   }
   const FSNFUSE = {
     symbol: "FSN/FUSE",
     decimals: 18,
-    image: "http://localhost:3000/icons/fsnFuse.png"
+    image: "https://freemoon.xyz/icons/fsnFuse.png"
   }
 
   const [ accounts, setAccounts ] = useState("")
