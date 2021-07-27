@@ -8,6 +8,7 @@ const config = {
     hardhat: {
       name: "Hardhat Local Node",
       id: 31337,
+      provider: "http://127.0.0.1:8545",
       contracts: {
         free: "0xa513E6E4b8f2a923D98304ec87F64353C4D5C853",
         freemoon: "0x2279B7A0a67DB372996a5FaB50D91eAA73d2eBe6",
@@ -21,6 +22,7 @@ const config = {
     fsnTestnet: {
       name: "Fusion Testnet",
       id: 46688,
+      provider: "https://testway.freemoon.xyz/gate",
       contracts: {
         free: "0x2DB153F1DE733d6e5D8875d243924f277Fa4313a",
         freemoon: "0xC0C3b04afAde71b9074aCE13Ee5403F61c52e66F",
@@ -34,6 +36,7 @@ const config = {
     fsnMainnet: {
       name: "Fusion Mainnet",
       id: 32659,
+      provider: "https://mainway.freemoon.xyz/gate",
       contracts: {
         free: "",
         freemoon: "",

@@ -177,12 +177,27 @@ export default function Freemoon({ connection }) {
   const FREE = {
     symbol: "FREE",
     decimals: 18,
-    image: "https://freemoon.xyz/images/free.png"
+    image: "https://freemoon.xyz/free-icons/android-chrome-512x512.png"
   }
   const FMN = {
     symbol: "FMN",
     decimals: 18,
-    image: "https://freemoon.xyz/images/fmn.png"
+    image: "https://freemoon.xyz/freemoon-icons/android-chrome-512x512.png"
+  }
+  const CHNG = {
+    symbol: "CHNG",
+    decimals: 18,
+    image: "http://localhost:3000/icons/chng.png"
+  }
+  const ANY = {
+    symbol: "ANY",
+    decimals: 18,
+    image: "http://localhost:3000/icons/any.png"
+  }
+  const FSNFUSE = {
+    symbol: "FSN/FUSE",
+    decimals: 18,
+    image: "http://localhost:3000/icons/fsnFuse.png"
   }
 
   const [ accounts, setAccounts ] = useState("")
@@ -452,6 +467,7 @@ export default function Freemoon({ connection }) {
   const addTokens = async () => {
     const web3 = new Web3(connection.provider)
     const network = await networkObj(web3)
+
     try {
       await connection.provider.request({
         method: "wallet_watchAsset",
@@ -479,6 +495,57 @@ export default function Freemoon({ connection }) {
             symbol: FMN.symbol,
             decimals: FMN.decimals,
             image: FMN.image,
+          },
+        },
+      })
+    } catch(err) {
+      console.log(err.message)
+    }
+    
+    try {
+      await connection.provider.request({
+        method: "wallet_watchAsset",
+        params: {
+          type: "ERC20",
+          options: {
+            address: network.contracts.chng,
+            symbol: CHNG.symbol,
+            decimals: CHNG.decimals,
+            image: CHNG.image,
+          },
+        },
+      })
+    } catch(err) {
+      console.log(err.message)
+    }
+    
+    try {
+      await connection.provider.request({
+        method: "wallet_watchAsset",
+        params: {
+          type: "ERC20",
+          options: {
+            address: network.contracts.any,
+            symbol: ANY.symbol,
+            decimals: ANY.decimals,
+            image: ANY.image,
+          },
+        },
+      })
+    } catch(err) {
+      console.log(err.message)
+    }
+    
+    try {
+      await connection.provider.request({
+        method: "wallet_watchAsset",
+        params: {
+          type: "ERC20",
+          options: {
+            address: network.contracts.fsnFuse,
+            symbol: FSNFUSE.symbol,
+            decimals: FSNFUSE.decimals,
+            image: FSNFUSE.image,
           },
         },
       })
@@ -515,7 +582,7 @@ export default function Freemoon({ connection }) {
             <FaCoins size={25}/>
           </Extras>
           <Extras onClick={() => addNetworks()}>
-            Switch Network
+            Connect to Fusion
           </Extras>
         </ExtrasRow>
         <Title>
