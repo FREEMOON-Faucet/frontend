@@ -203,27 +203,27 @@ export default function Freemoon({ connection }) {
   const FREE = {
     symbol: "FREE",
     decimals: 18,
-    image: "https://freemoon.xyz/icons/free.png"
+    image: "https://freemoonfaucet.xyz/icons/free.png"
   }
   const FMN = {
     symbol: "FMN",
     decimals: 18,
-    image: "https://freemoon.xyz/icons/fmn.png"
+    image: "https://freemoonfaucet.xyz/icons/fmn.png"
   }
   const CHNG = {
     symbol: "CHNG",
     decimals: 18,
-    image: "https://freemoon.xyz/icons/chng.png"
+    image: "https://freemoonfaucet.xyz/icons/chng.png"
   }
   const ANY = {
     symbol: "ANY",
     decimals: 18,
-    image: "https://freemoon.xyz/icons/any.png"
+    image: "https://freemoonfaucet.xyz/icons/any.png"
   }
   const FSNFUSE = {
     symbol: "FSN/FUSE",
     decimals: 18,
-    image: "https://freemoon.xyz/icons/fsnFuse.png"
+    image: "https://freemoonfaucet.xyz/icons/fsnFuse.png"
   }
 
   const [ accounts, setAccounts ] = useState("")
@@ -553,14 +553,14 @@ export default function Freemoon({ connection }) {
       await connection.provider.request({
         method: "wallet_addEthereumChain",
         params: [{
-          chainId: "0xb660",
-          chainName: "Fusion Testnet",
+          chainId: "0x7f93",
+          chainName: "Fusion Mainnet",
           nativeCurrency: {
             name: "Fusion",
             symbol: "FSN",
             decimals: 18
           },
-          rpcUrls: [ "https://testway.freemoon.xyz/gate" ]
+          rpcUrls: [ "https://mainway.freemoonfaucet.xyz/gate" ]
         }]
       })
     } catch(err) {
