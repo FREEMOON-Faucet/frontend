@@ -52,18 +52,18 @@ const FreeContract = async web3 => {
   return freeContract
 }
 
-const FreemoonContract = async web3 => {
-  let freemoonContract
+const FmnContract = async web3 => {
+  let fmnContract
   const network = (await networkObj(web3)).contracts
 
   if(network) {
-    freemoonContract = new web3.eth.Contract(
-      config.abi.freemoon,
-      network.freemoon
+    fmnContract = new web3.eth.Contract(
+      config.abi.fmn,
+      network.fmn
     )
   }
 
-  return freemoonContract
+  return fmnContract
 }
 
 const AirdropContract = async web3 => {
@@ -84,7 +84,7 @@ const AirdropContract = async web3 => {
 export {
   FaucetContract,
   FreeContract,
-  FreemoonContract,
+  FmnContract,
   AirdropContract,
   networkObj
 }

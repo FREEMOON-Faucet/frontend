@@ -3,7 +3,7 @@ import styled from "styled-components"
 import Web3 from "web3"
 import config from "../utils/config"
 
-import { FreeContract, FreemoonContract, FaucetContract } from "../utils/contracts"
+import { FreeContract, FmnContract, FaucetContract } from "../utils/contracts"
 
 const DashboardContainer = styled.div`
   display: flex;
@@ -119,11 +119,11 @@ export default function Dashboard({ connection }) {
       const web3 = new Web3(network.provider)
 
       const free = await FreeContract(web3)
-      const freemoon = await FreemoonContract(web3)
+      const fmn = await FmnContract(web3)
       const faucet = await FaucetContract(web3)
 
-      if(connection.connected) getBalanceSupply(web3, free, freemoon, connection.accounts[0])
-      else getBalanceSupply(web3, free, freemoon)
+      if(connection.connected) getBalanceSupply(web3, free, fmn, connection.accounts[0])
+      else getBalanceSupply(web3, free, fmn)
 
       getFreemoonFaucet(web3, network, faucet)
       getFusionMainnet()
@@ -133,17 +133,17 @@ export default function Dashboard({ connection }) {
     getStats()
   }, [ connection ])
 
-  const getBalanceSupply = async (web3, free, freemoon, account) => {
+  const getBalanceSupply = async (web3, free, fmn, account) => {
     let freeBal, fmnBal
     if(account) {
       freeBal = await free.methods.balanceOf(account).call()
-      fmnBal = await freemoon.methods.balanceOf(account).call()
+      fmnBal = await fmn.methods.balanceOf(account).call()
     } else {
       freeBal = "0"
       fmnBal = "0"
     }
     const freeSupply = await free.methods.circulationSupply().call()
-    const fmnSupply = await freemoon.methods.circulationSupply().call()
+    const fmnSupply = await fmn.methods.circulationSupply().call()
     setBalanceSupply({
       freeBal: web3.utils.fromWei(freeBal),
       fmnBal: web3.utils.fromWei(fmnBal),

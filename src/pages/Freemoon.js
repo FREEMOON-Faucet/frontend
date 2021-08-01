@@ -3,6 +3,7 @@ import styled from "styled-components"
 import { IoTime } from "react-icons/io5"
 import Web3 from "web3"
 
+import config from "../utils/config"
 import { FaucetContract, networkObj } from "../utils/contracts"
 
 import metamaskIcon from "../icons/metamaskcoins.svg"
@@ -195,36 +196,15 @@ export default function Freemoon({ connection }) {
 
   const SUB_DEFAULT = "Subscribe connected address."
   const CLAIM_DEFAULT = "Claim FREE for connected address."
-  const MINT_DEFAULT = "Enter amount of FSN to timelock."
   const WITHDRAW_DEFAULT = "Enter amount of FSN to withdraw from available funds."
   const LOADING = "Please wait ..."
   const SUCCESS = "Success!"
 
-  const FREE = {
-    symbol: "FREE",
-    decimals: 18,
-    image: "https://freemoonfaucet.xyz/icons/free.png"
-  }
-  const FMN = {
-    symbol: "FMN",
-    decimals: 18,
-    image: "https://freemoonfaucet.xyz/icons/fmn.png"
-  }
-  const CHNG = {
-    symbol: "CHNG",
-    decimals: 18,
-    image: "https://freemoonfaucet.xyz/icons/chng.png"
-  }
-  const ANY = {
-    symbol: "ANY",
-    decimals: 18,
-    image: "https://freemoonfaucet.xyz/icons/any.png"
-  }
-  const FSNFUSE = {
-    symbol: "FSN/FUSE",
-    decimals: 18,
-    image: "https://freemoonfaucet.xyz/icons/fsnFuse.png"
-  }
+  const FREE = config.tokens.free
+  const FMN = config.tokens.fmn
+  const CHNG = config.tokens.chng
+  const ANY = config.tokens.any
+  const FSNFUSE = config.tokens.fsnFuse
 
   const [ accounts, setAccounts ] = useState("")
   const [ withdrawal, setWithdrawal ] = useState({
@@ -234,11 +214,9 @@ export default function Freemoon({ connection }) {
 
   const [ subAccount, setSubAccount ] = useState("")
   const [ claimAccount, setClaimAccount ] = useState("")
-  const [ buyAmount, setBuyAmount ] = useState("")
 
   const [ subMessage, setSubMessage ] = useState(SUB_DEFAULT)
   const [ claimMessage, setClaimMessage ] = useState(CLAIM_DEFAULT)
-  const [ mintMessage, setMintMessage ] = useState(MINT_DEFAULT)
   const [ withdrawMessage, setWithdrawMessage ] = useState(WITHDRAW_DEFAULT)
 
   const [ isAdmin, setIsAdmin ] = useState(false)
@@ -467,29 +445,29 @@ export default function Freemoon({ connection }) {
     }
   }
 
-  const mintFree = async () => {
-    const web3 = new Web3(connection.provider)
-    const faucetAbs = await FaucetContract(web3)
-    const isPaused = await faucetAbs.methods.isPaused("timelockToFree").call()
-    if(isPaused) {
-      setMintMessage("Minting FREE is currently paused.")
-      return
-    }
-    const isSubscribed = await checkForSubscribe(accounts[0], faucetAbs)
-    if(!isSubscribed) {
-      setMintMessage("This address is not subscribed.")
-      return
-    }
+  // const mintFree = async () => {
+  //   const web3 = new Web3(connection.provider)
+  //   const faucetAbs = await FaucetContract(web3)
+  //   const isPaused = await faucetAbs.methods.isPaused("timelockToFree").call()
+  //   if(isPaused) {
+  //     setMintMessage("Minting FREE is currently paused.")
+  //     return
+  //   }
+  //   const isSubscribed = await checkForSubscribe(accounts[0], faucetAbs)
+  //   if(!isSubscribed) {
+  //     setMintMessage("This address is not subscribed.")
+  //     return
+  //   }
 
-    try {
-      setMintMessage(LOADING)
-      await faucetAbs.methods.timelockToFree().send({value: web3.utils.toWei(String(buyAmount), "ether"), from: accounts[0]})
-      setMintMessage(SUCCESS)
-    } catch(err) {
-      console.log(err.message)
-      setMintMessage(MINT_DEFAULT)
-    }
-  }
+  //   try {
+  //     setMintMessage(LOADING)
+  //     await faucetAbs.methods.timelockToFree().send({value: web3.utils.toWei(String(buyAmount), "ether"), from: accounts[0]})
+  //     setMintMessage(SUCCESS)
+  //   } catch(err) {
+  //     console.log(err.message)
+  //     setMintMessage(MINT_DEFAULT)
+  //   }
+  // }
 
   const addTokens = async () => {
     const web3 = new Web3(connection.provider)
@@ -503,7 +481,7 @@ export default function Freemoon({ connection }) {
         image: FREE.image
       },
       {
-        address: network.contracts.freemoon,
+        address: network.contracts.fmn,
         symbol: FMN.symbol,
         decimals: FMN.decimals,
         image: FMN.image
@@ -600,22 +578,6 @@ export default function Freemoon({ connection }) {
         </Bar>
         <Message>
           {claimMessage}
-        </Message>
-        <Title>
-          Mint FREE
-        </Title>
-        <Detail>
-          You can mint FREE with timelock FSN. The current rate is:<br/>
-          1 4-month TL FSN == 50 FREE.
-        </Detail>
-        <Bar>
-          <Input placeholder="Amount of FSN to timelock ..." spellCheck={false} onChange={e => setBuyAmount(e.target.value)}/>
-          <Fill onClick={() => buyAmount ? mintFree() : ""}>
-            <IoTime size="40"/>
-          </Fill>
-        </Bar>
-        <Message>
-          {mintMessage}
         </Message>
         <AdminGov show={isAdmin}>
           <Title>
