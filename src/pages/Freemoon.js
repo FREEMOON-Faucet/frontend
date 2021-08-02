@@ -1,6 +1,5 @@
 import { useState, useEffect } from "react"
 import styled from "styled-components"
-import { IoTime } from "react-icons/io5"
 import Web3 from "web3"
 
 import config from "../utils/config"

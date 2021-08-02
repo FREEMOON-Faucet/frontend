@@ -24,10 +24,10 @@ const config = {
       id: 46688,
       provider: "https://testway.freemoon.xyz/gate",
       contracts: {
-        free: "0x2DB153F1DE733d6e5D8875d243924f277Fa4313a",
-        fmn: "0xC0C3b04afAde71b9074aCE13Ee5403F61c52e66F",
-        faucet: "0xA648b9090fc146D96f80eE43879C349FE66e57b7",
-        airdrop: "0x610Eaf465a12c427a6ed930d8E2ccD00A9a1981c",
+        free: "0x60364ad97beb8EC63d19B021677d02D9152b5E51",
+        fmn: "0x3EF3feC91F85926a25732A2bD8bE5f9A8BFC40e1",
+        faucet: "0x7aBf00a759f5F377f0cF885D168803E9D326f387",
+        airdrop: "0xeE59ee5f266855426E3a519c555dc9cB00aC67b0",
         chng: "0xf7eD89b804CC22Cb188986Eeb6D5F01d522d5138",
         any: "0x8B0Cb6c96522a5e27466808D6992838044ae7192",
         fsnFuse: "0x2ac2055cea2FDc44850F7fE52EAFD18e64a77984"
@@ -45,16 +45,6 @@ const config = {
         chng: "0xed0294dbd2a0e52a09c3f38a09f6e03de2c44fcf",
         any: "0x0c74199d22f732039e843366a236ff4f61986b32",
         fsnFuse: "0xe96ac326ecea1a09ae6e47487c5d8717f73d5a7e"
-      }
-    },
-    fsnTestnetOld: {
-      name: "Fusion Testnet Old",
-      id: 46688,
-      contracts: {
-        free: "0xeFb4859410D57fF9a0f01E696A0E7e06Ebde020E",
-        fmn: "0x8916fdDd7181D36a8A0deC81b2BDc32164A47DE3",
-        faucet: "0x77aE9d69A428AcdB88dbcDA41f35fD910F1D40d7",
-        airdrop: ""
       }
     }
   },
