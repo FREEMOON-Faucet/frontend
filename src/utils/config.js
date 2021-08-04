@@ -40,7 +40,7 @@ const config = {
       contracts: {
         free: "0x6403eDe3b7604ea4883670c670BeA288618BD5F2",
         fmn: "0xB80A6C4F2a279ec91921ca30da726c534462125C",
-        faucet: "",
+        faucet: "0x65D484355D7b770Dd73E81a22a3199b8BA4e3c2C",
         airdrop: "",
         chng: "0xed0294dbd2a0e52a09c3f38a09f6e03de2c44fcf",
         any: "0x0c74199d22f732039e843366a236ff4f61986b32",
