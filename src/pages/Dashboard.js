@@ -115,7 +115,7 @@ export default function Dashboard({ connection }) {
 
   useEffect(() => {
     const getStats = async () => {
-      const network = config.networks.fsnTestnet
+      const network = config.networks.fsnMainnet
       const web3 = new Web3(network.provider)
 
       const free = await FreeContract(web3)

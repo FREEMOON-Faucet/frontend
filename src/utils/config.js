@@ -24,10 +24,10 @@ const config = {
       id: 46688,
       provider: "https://testway.freemoon.xyz/gate",
       contracts: {
-        free: "0x60364ad97beb8EC63d19B021677d02D9152b5E51",
-        fmn: "0x3EF3feC91F85926a25732A2bD8bE5f9A8BFC40e1",
-        faucet: "0x7aBf00a759f5F377f0cF885D168803E9D326f387",
-        airdrop: "0xeE59ee5f266855426E3a519c555dc9cB00aC67b0",
+        free: "0x984e4B2bE971747a1A545CFe58f564F224148dC5",
+        fmn: "0x96be0fd6c2f434bdb0E1a61148Fe4bbA5cc19987",
+        faucet: "0x8F72b524431B359cA491981cB9fa8edA2d8483bf",
+        airdrop: "0xC8ad811eC9576F072d57d158c2E1a8661e9cB110",
         chng: "0xf7eD89b804CC22Cb188986Eeb6D5F01d522d5138",
         any: "0x8B0Cb6c96522a5e27466808D6992838044ae7192",
         fsnFuse: "0x2ac2055cea2FDc44850F7fE52EAFD18e64a77984"
@@ -40,8 +40,8 @@ const config = {
       contracts: {
         free: "0x6403eDe3b7604ea4883670c670BeA288618BD5F2",
         fmn: "0xB80A6C4F2a279ec91921ca30da726c534462125C",
-        faucet: "0x65D484355D7b770Dd73E81a22a3199b8BA4e3c2C",
-        airdrop: "",
+        faucet: "0x1B1459D4B9eD19050ECb1E9959e0d94c0FBE0603",
+        airdrop: "0x72EACa2D38C234344DcE423575B9f681FF28107f",
         chng: "0xed0294dbd2a0e52a09c3f38a09f6e03de2c44fcf",
         any: "0x0c74199d22f732039e843366a236ff4f61986b32",
         fsnFuse: "0xe96ac326ecea1a09ae6e47487c5d8717f73d5a7e"

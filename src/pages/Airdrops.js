@@ -191,7 +191,8 @@ const SubMessage = styled.div`
 
 export default function Airdrops({ connection }) {
 
-  const FSN = "0xffffffffffffffffffffffffffffffffffffffff"
+  const FSN_FUSE = "0xe96ac326ecea1a09ae6e47487c5d8717f73d5a7e"
+
   const AIRDROP_DEFAULT = "You can only claim once per day."
   const SUCCESS = "Success!"
   const UPDATE_ASSET_DEFAULT = "Enter the address of the token to add/update along with the balance required to receive FREE airdrops."
@@ -210,7 +211,6 @@ export default function Airdrops({ connection }) {
   })
   const [ paramStatus, setParamStatus ] = useState({
     admin: "",
-    coordinator: "",
     airdropAmount: 0,
     airdropCooldown: 0
   })
@@ -220,38 +220,49 @@ export default function Airdrops({ connection }) {
   })
 
   useEffect(() => {
-    const getEligibleTokens = async () => {
+    const getAirdropAssets = async () => {
       const web3 = new Web3(connection.provider)
       const airdropAbs = await AirdropContract(web3)
-      const assetCount = await airdropAbs.methods.assetCount().call()
-      let eligibleTokens = []
-      for(let i = 0; i < assetCount; i++) {
-        let addr = await airdropAbs.methods.eligibleAssets(i).call()
+      const count = Number(await airdropAbs.methods.airdropAssetCount().call())
+      let airdropAssets = []
+      for(let i = 0; i < count; i++) {
+        let addr = await airdropAbs.methods.airdropAssets(i).call()
+        let tokenAbs = new web3.eth.Contract(ERC20, addr)
         let symbol
-        if(addr.toLowerCase() === FSN) {
-          symbol = "FSN"
+        if(addr.toLowerCase() === FSN_FUSE.toLowerCase()) {
+          symbol = "FSN/FUSE"
         } else {
-          let tokenAbs = new web3.eth.Contract(ERC20, addr)
           symbol = await tokenAbs.methods.symbol().call()
         }
-        let balanceRequired = web3.utils.fromWei(await airdropAbs.methods.balRequiredFor(addr).call())
-        eligibleTokens.push({
+        let balanceRequired = web3.utils.fromWei(await airdropAbs.methods.balanceRequired(addr).call())
+        airdropAssets.push({
           address: addr,
           symbol: symbol,
           bal: balanceRequired
         })
       }
-      setEligibleTokens(eligibleTokens)
+      setEligibleTokens(airdropAssets)
+    }
+
+    const claimableFree = async (airdropAbs, web3) => {
+      const count = Number(await airdropAbs.methods.airdropAssetCount().call())
+      let total = 0
+      for(let i = 0; i < count; i++) {
+        let asset = await airdropAbs.methods.airdropAssets(i).call()
+        let unclaimed = Number(web3.utils.fromWei(await airdropAbs.methods.getClaimable(connection.accounts[0], asset).call()))
+        total += unclaimed
+      }
+      return String(total)
     }
 
     const refreshClaimable = async () => {
       const web3 = new Web3(connection.provider)
       const airdropAbs = await AirdropContract(web3)
-      const claimable = web3.utils.fromWei(await airdropAbs.methods.getClaimable(connection.accounts[0]).call())
-      setClaimable(claimable)
+      const unclaimed = await claimableFree(airdropAbs, web3)
+      setClaimable(unclaimed)
     }
     if(connection.connected) {
-      getEligibleTokens()
+      getAirdropAssets()
       refreshClaimable()
     }
   }, [ connection, airdropMessage, updateAsset ])
@@ -292,6 +303,17 @@ export default function Airdrops({ connection }) {
     })
   }
 
+  const claimableFree = async (airdropAbs, web3) => {
+    const count = Number(await airdropAbs.methods.airdropAssetCount().call())
+    let total = 0
+    for(let i = 0; i < count; i++) {
+      let asset = await airdropAbs.methods.airdropAssets(i).call()
+      let unclaimed = Number(web3.utils.fromWei(await airdropAbs.methods.getClaimable(connection.accounts[0], asset).call()))
+      total += unclaimed
+    }
+    return String(total)
+  }
+
   const claimAirdrop = async () => {
     const web3 = new Web3(connection.provider)
     const airdropAbs = await AirdropContract(web3)
@@ -309,14 +331,14 @@ export default function Airdrops({ connection }) {
       return
     }
 
-    const notClaimed = web3.utils.fromWei(await airdropAbs.methods.getClaimable(connection.accounts[0]).call())
+    const notClaimed = await claimableFree(airdropAbs, web3)
     if(notClaimed === "0") {
       setAirdropMessage("No FREE airdrop to be claimed.")
       return
     }
 
     try {
-      await airdropAbs.methods.claimAirdrop().send({from: connection.accounts[0]})
+      await airdropAbs.methods.claimAirdrop().send({from: connection.accounts[0], gas: 200000})
       setAirdropMessage(SUCCESS)
     } catch(err) {
       console.log(err.message)
@@ -362,7 +384,6 @@ export default function Airdrops({ connection }) {
   const refreshParams = async (web3, airdropAbs) => {
     let newParamStatus = {}
     newParamStatus.admin = (await airdropAbs.methods.admin().call()).toLowerCase()
-    newParamStatus.coordinator = (await airdropAbs.methods.coordinator().call()).toLowerCase()
     newParamStatus.airdropAmount = web3.utils.fromWei(await airdropAbs.methods.airdropAmount().call())
     newParamStatus.airdropCooldown = (await airdropAbs.methods.airdropCooldown().call()).toString()
 
@@ -375,7 +396,6 @@ export default function Airdrops({ connection }) {
 
     const {
       admin,
-      coordinator,
       airdropAmount,
       airdropCooldown
     } = paramStatus
@@ -383,7 +403,6 @@ export default function Airdrops({ connection }) {
     try {
       await airdropAbs.methods.updateParams(
         admin,
-        coordinator,
         web3.utils.toWei(String(airdropAmount), "ether"),
         String(airdropCooldown)
       ).send({from: connection.accounts[0]})
@@ -483,10 +502,6 @@ export default function Airdrops({ connection }) {
             <Input value={paramStatus.admin} placeholder="New Admin Address ..." spellCheck={false} onChange={e => setParamStatus(prevState => ({...prevState, admin: e.target.value}))}/>
           </Bar>
           <SubMessage>Admin</SubMessage>
-          <Bar>
-            <Input value={paramStatus.coordinator} placeholder="New Coordinator Address ..." spellCheck={false} onChange={e => setParamStatus(prevState => ({...prevState, coordinator: e.target.value}))}/>
-          </Bar>
-          <SubMessage>Coordinator</SubMessage>
           <Bar>
             <Input value={paramStatus.airdropAmount} placeholder="New Airdrop Amoun ..." spellCheck={false} onChange={e => setParamStatus(prevState => ({...prevState, airdropAmount: e.target.value}))}/>
           </Bar>

@@ -594,10 +594,6 @@ export default function Freemoon({ connection }) {
               <Checkbox type="checkbox" checked={pauseStatus.claim} onChange={e => setPauseStatus(prevState => ({...prevState, claim: e.target.checked}))}/>
               Claim
             </Selection>
-            <Selection>
-              <Checkbox type="checkbox" checked={pauseStatus.timelockToFree} onChange={e => setPauseStatus(prevState => ({...prevState, timelockToFree: e.target.checked}))}/>
-              Mint
-            </Selection>
             <Extras onClick={() => setPause()}>
               Update
             </Extras>
