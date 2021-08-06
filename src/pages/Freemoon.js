@@ -8,6 +8,7 @@ import { FaucetContract, networkObj } from "../utils/contracts"
 import metamaskIcon from "../icons/metamaskcoins.svg"
 import subscribeIcon from "../icons/subscribe.svg"
 import claimIcon from "../icons/claim.svg"
+import BigNumber from "bignumber.js"
 
 const FreemoonContainer = styled.div`
   display: flex;
@@ -436,8 +437,21 @@ export default function Freemoon({ connection }) {
 
     try {
       setClaimMessage(LOADING)
-      await faucetAbs.methods.claim(claimAccount).send({from: accounts[0]})
-      setClaimMessage(SUCCESS)
+      const receipt = await faucetAbs.methods.claim(claimAccount).send({from: accounts[0]})
+      const { events } = receipt
+      const { Entry } = events
+      const { transactionHash: tx, blockHash: block, returnValues: ret } = Entry
+      const { lottery } = ret
+      const result = await faucetAbs.methods.checkIfWin(lottery, tx, block).call()
+      let win
+      if(BigNumber(result["1"]).isEqualTo("0")) win = false
+      else win = Boolean(BigNumber(result["0"]).isLessThanOrEqualTo(BigNumber(["1"])))
+      console.log(result["0"].toString(), result["1"].toString())
+      const mssg = win ? "Congratulations! You just won 1 FMN." : "You did not win, better luck next time."
+      setClaimMessage(`
+        ${mssg}
+        Tx Hash: ${tx}
+      `)
     } catch(err) {
       console.log(err.message)
       setClaimMessage(CLAIM_DEFAULT)
