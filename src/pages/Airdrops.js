@@ -288,6 +288,14 @@ export default function Airdrops({ connection }) {
     }
   }, [ connection ])
 
+  const connectUser = async () => {
+    try {
+      await connection.connect()
+    } catch(err) {
+      throw new Error(`Failed to connect: ${err.message}`)
+    }
+  }
+
   const displayTokens = () => {
     return eligibleTokens.map(token => {
       return (
@@ -315,6 +323,10 @@ export default function Airdrops({ connection }) {
   }
 
   const claimAirdrop = async () => {
+    if(!connection.connected) {
+      await connectUser()
+      return
+    }
     const web3 = new Web3(connection.provider)
     const airdropAbs = await AirdropContract(web3)
     const faucetAbs = await FaucetContract(web3)
@@ -353,6 +365,10 @@ export default function Airdrops({ connection }) {
   }
 
   const setPause = async () => {
+    if(!connection.connected) {
+      await connectUser()
+      return
+    }
     const web3 = new Web3(connection.provider)
     const airdropAbs = await AirdropContract(web3)
     let toPause = []
@@ -391,6 +407,10 @@ export default function Airdrops({ connection }) {
   }
 
   const setParams = async () => {
+    if(!connection.connected) {
+      await connectUser()
+      return
+    }
     const web3 = new Web3(connection.provider)
     const airdropAbs = await AirdropContract(web3)
 
@@ -414,6 +434,10 @@ export default function Airdrops({ connection }) {
   }
 
   const setAssets = async () => {
+    if(!connection.connected) {
+      await connectUser()
+      return
+    }
     const web3 = new Web3(connection.provider)
     const airdropAbs = await AirdropContract(web3)
 
@@ -437,110 +461,100 @@ export default function Airdrops({ connection }) {
     setUpdateAsset({address: "", balanceRequired: 0})
   }
 
-  if(connection.connected) {
-    return (
-      <AirdropsContainer>
+  return (
+    <AirdropsContainer>
+      <Title>
+        Airdrop Receivers
+      </Title>
+      <Detail>
+        Holders of these tokens will be able to claim a FREE airdrop once every day. The balances required to receive the airdrop are as follows:
+      </Detail>
+      <Table>
+        <thead>
+          <Tr title={true}>
+            <Td>Token</Td>
+            <Td>Balance/FREE</Td>
+          </Tr>
+        </thead>
+        <tbody>
+          {displayTokens()}
+        </tbody>
+      </Table>
+      <Title>
+        Claim Airdrop
+      </Title>
+      <Detail>
+        Here you can claim FREE which was airdropped to you based on your token balances.
+      </Detail>
+      <Bar>
+        <Display>
+          {claimable}
+        </Display>
+        <Fill onClick={() => claimAirdrop()}>
+          <FaParachuteBox size="30"/>
+        </Fill>
+      </Bar>
+      <Message>
+        {airdropMessage}
+      </Message>
+      <AdminGov show={isAdmin}>
         <Title>
-          Airdrop Receivers
+          Pause / Unpause
         </Title>
         <Detail>
-          Holders of these tokens will be able to claim a FREE airdrop once every day. The balances required to receive the airdrop are as follows:
+          Pause or unpause specific contract functionality. Only accessible to admin address.
         </Detail>
-        <Table>
-          <thead>
-            <Tr title={true}>
-              <Td>Token</Td>
-              <Td>Balance/FREE</Td>
-            </Tr>
-          </thead>
-          <tbody>
-            {displayTokens()}
-          </tbody>
-        </Table>
-        <Title>
-          Claim Airdrop
-        </Title>
-        <Detail>
-          Here you can claim FREE which was airdropped to you based on your token balances.
-        </Detail>
-        <Bar>
-          <Display>
-            {claimable}
-          </Display>
-          <Fill onClick={() => claimAirdrop()}>
-            <FaParachuteBox size="30"/>
-          </Fill>
-        </Bar>
-        <Message>
-          {airdropMessage}
-        </Message>
-        <AdminGov show={isAdmin}>
-          <Title>
-            Pause / Unpause
-          </Title>
-          <Detail>
-            Pause or unpause specific contract functionality. Only accessible to admin address.
-          </Detail>
-          <Options>
-            <Selection>
-              <Checkbox type="checkbox" checked={pauseStatus.claimAirdrop} onChange={e => setPauseStatus(prevState => ({...prevState, claimAirdrop: e.target.checked}))}/>
-              Claim Airdrop
-            </Selection>
-            <Extras onClick={() => setPause()}>
-              Update
-            </Extras>
-          </Options>
-        </AdminGov>
-        <AdminGov show={isGov}>
-          <Title>
-            Update Faucet Settings
-          </Title>
-          <Detail>
-            Update settings which determine how the airdrops operate. Only accessible to governance address.
-          </Detail>
-          <Bar>
-            <Input value={paramStatus.admin} placeholder="New Admin Address ..." spellCheck={false} onChange={e => setParamStatus(prevState => ({...prevState, admin: e.target.value}))}/>
-          </Bar>
-          <SubMessage>Admin</SubMessage>
-          <Bar>
-            <Input value={paramStatus.airdropAmount} placeholder="New Airdrop Amoun ..." spellCheck={false} onChange={e => setParamStatus(prevState => ({...prevState, airdropAmount: e.target.value}))}/>
-          </Bar>
-          <SubMessage>Airdrop Amount</SubMessage>
-          <Bar>
-            <Input value={paramStatus.airdropCooldown} placeholder="New Airdrop Cooldown ..." spellCheck={false} onChange={e => setParamStatus(prevState => ({...prevState, airdropCooldown: e.target.value}))}/>
-          </Bar>
-          <SubMessage>Airdrop Cooldown (sec)</SubMessage> 
-          <Extras spaceAbove={true} onClick={() => setParams()}>
+        <Options>
+          <Selection>
+            <Checkbox type="checkbox" checked={pauseStatus.claimAirdrop} onChange={e => setPauseStatus(prevState => ({...prevState, claimAirdrop: e.target.checked}))}/>
+            Claim Airdrop
+          </Selection>
+          <Extras onClick={() => setPause()}>
             Update
           </Extras>
-          <Title>
-            Add/Update Assets
-          </Title>
-          <Detail>
-            Add new tokens which will award holders FREE airdrops, or update existing ones.
-          </Detail>
-          <Bar>
-            <Input value={updateAsset.address} placeholder="Token Address ..." spellCheck={false} onChange={e => setUpdateAsset(prevState => ({...prevState, address: e.target.value}))}/>
-          </Bar>
-          <Bar>
-            <Input value={updateAsset.balanceRequired} placeholder="Balance Required ..." spellCheck={false} onChange={e => setUpdateAsset(prevState => ({...prevState, balanceRequired: e.target.value}))}/>
-          </Bar>
-          <SubMessage>
-            {updateAssetMessage}
-          </SubMessage>
-          <Extras spaceAbove={true} onClick={() => setAssets()}>
-            Done
-          </Extras>
-        </AdminGov>
-      </AirdropsContainer>
-    )
-  } else {
-    return (
-      <AirdropsContainer>
+        </Options>
+      </AdminGov>
+      <AdminGov show={isGov}>
+        <Title>
+          Update Faucet Settings
+        </Title>
         <Detail>
-          You must connect your MetaMask wallet to use this app.
+          Update settings which determine how the airdrops operate. Only accessible to governance address.
         </Detail>
-      </AirdropsContainer>
-    )
-  }
+        <Bar>
+          <Input value={paramStatus.admin} placeholder="New Admin Address ..." spellCheck={false} onChange={e => setParamStatus(prevState => ({...prevState, admin: e.target.value}))}/>
+        </Bar>
+        <SubMessage>Admin</SubMessage>
+        <Bar>
+          <Input value={paramStatus.airdropAmount} placeholder="New Airdrop Amoun ..." spellCheck={false} onChange={e => setParamStatus(prevState => ({...prevState, airdropAmount: e.target.value}))}/>
+        </Bar>
+        <SubMessage>Airdrop Amount</SubMessage>
+        <Bar>
+          <Input value={paramStatus.airdropCooldown} placeholder="New Airdrop Cooldown ..." spellCheck={false} onChange={e => setParamStatus(prevState => ({...prevState, airdropCooldown: e.target.value}))}/>
+        </Bar>
+        <SubMessage>Airdrop Cooldown (sec)</SubMessage> 
+        <Extras spaceAbove={true} onClick={() => setParams()}>
+          Update
+        </Extras>
+        <Title>
+          Add/Update Assets
+        </Title>
+        <Detail>
+          Add new tokens which will award holders FREE airdrops, or update existing ones.
+        </Detail>
+        <Bar>
+          <Input value={updateAsset.address} placeholder="Token Address ..." spellCheck={false} onChange={e => setUpdateAsset(prevState => ({...prevState, address: e.target.value}))}/>
+        </Bar>
+        <Bar>
+          <Input value={updateAsset.balanceRequired} placeholder="Balance Required ..." spellCheck={false} onChange={e => setUpdateAsset(prevState => ({...prevState, balanceRequired: e.target.value}))}/>
+        </Bar>
+        <SubMessage>
+          {updateAssetMessage}
+        </SubMessage>
+        <Extras spaceAbove={true} onClick={() => setAssets()}>
+          Done
+        </Extras>
+      </AdminGov>
+    </AirdropsContainer>
+  )
 }

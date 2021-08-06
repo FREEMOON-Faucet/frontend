@@ -263,6 +263,14 @@ export default function Freemoon({ connection }) {
     }
   }, [ connection ])
 
+  const connectUser = async () => {
+    try {
+      await connection.connect()
+    } catch(err) {
+      throw new Error(`Failed to connect: ${err.message}`)
+    }
+  }
+
   const refreshPaused = async faucetAbs => {
     let newPauseStatus = {}
     newPauseStatus.subscribe = await faucetAbs.methods.isPaused("subscribe").call()
@@ -273,6 +281,10 @@ export default function Freemoon({ connection }) {
   }
 
   const setPause = async () => {
+    if(!connection.connected) {
+      await connectUser()
+      return
+    }
     const web3 = new Web3(connection.provider)
     const faucetAbs = await FaucetContract(web3)
     let toPause = []
@@ -320,6 +332,10 @@ export default function Freemoon({ connection }) {
   }
 
   const setParams = async () => {
+    if(!connection.connected) {
+      await connectUser()
+      return
+    }
     const web3 = new Web3(connection.provider)
     const faucetAbs = await FaucetContract(web3)
 
@@ -351,6 +367,10 @@ export default function Freemoon({ connection }) {
   }
 
   const withdraw = async () => {
+    if(!connection.connected) {
+      await connectUser()
+      return
+    }
     const web3 = new Web3(connection.provider)
     const faucetAbs = await FaucetContract(web3)
     const bal = await checkFaucetBal(web3)
@@ -392,6 +412,10 @@ export default function Freemoon({ connection }) {
   }
 
   const subscribe = async () => {
+    if(!connection.connected) {
+      await connectUser()
+      return
+    }
     const web3 = new Web3(connection.provider)
     const faucetAbs = await FaucetContract(web3)
     const isPaused = await faucetAbs.methods.isPaused("subscribe").call()
@@ -417,6 +441,10 @@ export default function Freemoon({ connection }) {
   }
 
   const claim = async () => {
+    if(!connection.connected) {
+      await connectUser()
+      return
+    }
     const web3 = new Web3(connection.provider)
     const faucetAbs = await FaucetContract(web3)
     const claimPaused = await faucetAbs.methods.isPaused("claim").call()
@@ -458,31 +486,11 @@ export default function Freemoon({ connection }) {
     }
   }
 
-  // const mintFree = async () => {
-  //   const web3 = new Web3(connection.provider)
-  //   const faucetAbs = await FaucetContract(web3)
-  //   const isPaused = await faucetAbs.methods.isPaused("timelockToFree").call()
-  //   if(isPaused) {
-  //     setMintMessage("Minting FREE is currently paused.")
-  //     return
-  //   }
-  //   const isSubscribed = await checkForSubscribe(accounts[0], faucetAbs)
-  //   if(!isSubscribed) {
-  //     setMintMessage("This address is not subscribed.")
-  //     return
-  //   }
-
-  //   try {
-  //     setMintMessage(LOADING)
-  //     await faucetAbs.methods.timelockToFree().send({value: web3.utils.toWei(String(buyAmount), "ether"), from: accounts[0]})
-  //     setMintMessage(SUCCESS)
-  //   } catch(err) {
-  //     console.log(err.message)
-  //     setMintMessage(MINT_DEFAULT)
-  //   }
-  // }
-
   const addTokens = async () => {
+    if(!connection.connected) {
+      await connectUser()
+      return
+    }
     const web3 = new Web3(connection.provider)
     const network = await networkObj(web3)
 
@@ -540,6 +548,10 @@ export default function Freemoon({ connection }) {
   }
 
   const addNetworks = async () => {
+    if(!connection.connected) {
+      await connectUser()
+      return
+    }
     try {
       await connection.provider.request({
         method: "wallet_addEthereumChain",
@@ -559,126 +571,116 @@ export default function Freemoon({ connection }) {
     }
   }
 
-  if(connection.connected) {
-    return (
-      <FreemoonContainer>
-        <ExtrasRow>
-          <Extras onClick={() => addTokens()}>
-            <MetaMask src={metamaskIcon} alt="Add Tokens"/>
-          </Extras>
-          <Extras onClick={() => addNetworks()}>
-            Connect to Fusion
-          </Extras>
-        </ExtrasRow>
+  return (
+    <FreemoonContainer>
+      <ExtrasRow>
+        <Extras onClick={() => addTokens()}>
+          <MetaMask src={metamaskIcon} alt="Add Tokens"/>
+        </Extras>
+        <Extras onClick={() => addNetworks()}>
+          Connect to Fusion
+        </Extras>
+      </ExtrasRow>
+      <Title>
+        Subscribe
+      </Title>
+      <Bar>
+        <Fill onClick={() => subscribe()} single={true}>
+          <Icon src={subscribeIcon} alt="Subscribe"/>
+        </Fill>
+      </Bar>
+      <Message>
+        {subMessage}
+      </Message>
+      <Title>
+        Claim FREE
+      </Title>
+      <Bar>
+        <Fill onClick={() => claim()} single={true}>
+          <Icon src={claimIcon} alt="Claim"/>
+        </Fill>
+      </Bar>
+      <Message>
+        {claimMessage}
+      </Message>
+      <AdminGov show={isAdmin}>
         <Title>
-          Subscribe
+          Pause / Unpause
         </Title>
-        <Bar>
-          <Fill onClick={() => subAccount ? subscribe() : ""} single={true}>
-            <Icon src={subscribeIcon} alt="Subscribe"/>
-          </Fill>
-        </Bar>
-        <Message>
-          {subMessage}
-        </Message>
-        <Title>
-          Claim FREE
-        </Title>
-        <Bar>
-          <Fill onClick={() => claimAccount ? claim() : ""} single={true}>
-            <Icon src={claimIcon} alt="Claim"/>
-          </Fill>
-        </Bar>
-        <Message>
-          {claimMessage}
-        </Message>
-        <AdminGov show={isAdmin}>
-          <Title>
-            Pause / Unpause
-          </Title>
-          <Detail>
-            Pause or unpause specific contract functionality. Only accessible to admin address.
-          </Detail>
-          <Options>
-            <Selection>
-              <Checkbox type="checkbox" checked={pauseStatus.subscribe} onChange={e => setPauseStatus(prevState => ({...prevState, subscribe: e.target.checked}))}/>
-              Subscribe
-            </Selection>
-            <Selection>
-              <Checkbox type="checkbox" checked={pauseStatus.claim} onChange={e => setPauseStatus(prevState => ({...prevState, claim: e.target.checked}))}/>
-              Claim
-            </Selection>
-            <Extras onClick={() => setPause()}>
-              Update
-            </Extras>
-          </Options>
-        </AdminGov>
-        <AdminGov show={isGov}>
-          <Title>
-            Update Faucet Settings
-          </Title>
-          <Detail>
-            Update settings which determine how the faucet operates. Only accessible to governance address.
-          </Detail>
-          <Bar>
-            <Input value={paramStatus.admin} placeholder="New Admin Address ..." spellCheck={false} onChange={e => setParamStatus(prevState => ({...prevState, admin: e.target.value}))}/>
-          </Bar>
-          <SubMessage>Admin</SubMessage>
-          <Bar>
-            <Input value={paramStatus.coordinator} placeholder="New Coordinator Address ..." spellCheck={false} onChange={e => setParamStatus(prevState => ({...prevState, coordinator: e.target.value}))}/>
-          </Bar>
-          <SubMessage>Coordinator</SubMessage>
-          <Bar>
-            <Input value={paramStatus.subscriptionCost} placeholder="New Subscription Cost ..." spellCheck={false} onChange={e => setParamStatus(prevState => ({...prevState, subscriptionCost: e.target.value}))}/>
-          </Bar>
-          <SubMessage>Subscription Cost (FSN)</SubMessage>
-          <Bar>
-            <Input value={paramStatus.cooldownTime} placeholder="New Cooldown Time ..." spellCheck={false} onChange={e => setParamStatus(prevState => ({...prevState, cooldownTime: e.target.value}))}/>
-          </Bar>
-          <SubMessage>Cooldown Time (sec)</SubMessage>
-          <Bar>
-            <Input value={paramStatus.payoutThreshold} placeholder="New Payout Threshold ..." spellCheck={false} onChange={e => setParamStatus(prevState => ({...prevState, payoutThreshold: e.target.value}))}/>
-          </Bar>
-          <SubMessage>Payout Threshold</SubMessage>
-          <Bar>
-            <Input value={paramStatus.payoutAmount} placeholder="New Payout Amount ..." spellCheck={false} onChange={e => setParamStatus(prevState => ({...prevState, payoutAmount: e.target.value}))}/>
-          </Bar>
-          <SubMessage>Payout Amount (FREE)</SubMessage>
-          <Bar>
-            <Input value={paramStatus.hotWalletLimit} placeholder="New Hot Wallet Limit ..." spellCheck={false} onChange={e => setParamStatus(prevState => ({...prevState, hotWalletLimit: e.target.value}))}/>
-          </Bar>
-          <SubMessage>Hot Wallet Limit (FSN)</SubMessage>
-          <Extras spaceAbove={true} onClick={() => setParams()}>
+        <Detail>
+          Pause or unpause specific contract functionality. Only accessible to admin address.
+        </Detail>
+        <Options>
+          <Selection>
+            <Checkbox type="checkbox" checked={pauseStatus.subscribe} onChange={e => setPauseStatus(prevState => ({...prevState, subscribe: e.target.checked}))}/>
+            Subscribe
+          </Selection>
+          <Selection>
+            <Checkbox type="checkbox" checked={pauseStatus.claim} onChange={e => setPauseStatus(prevState => ({...prevState, claim: e.target.checked}))}/>
+            Claim
+          </Selection>
+          <Extras onClick={() => setPause()}>
             Update
           </Extras>
-          <Title>
-            Withdraw Funds
-          </Title>
-          <Detail>
-            Withdraw Subscription Fees to an external wallet.
-          </Detail>
-          <Bar>
-            <Input placeholder="Recipient ..." spellCheck={false} onChange={e => setWithdrawal(prevState => ({...prevState, recipient: e.target.value}))}/>
-          </Bar>
-          <Bar>
-            <Input value={withdrawal.amount} placeholder="Amount ..." spellCheck={false} onChange={e => setWithdrawal(prevState => ({...prevState, amount: e.target.value}))}/>
-          </Bar>
-          <SubMessage>
-            {withdrawMessage}
-          </SubMessage>
-          <Extras spaceAbove={true} onClick={() => withdraw()}>
-            Withdraw
-          </Extras>
-        </AdminGov>
-      </FreemoonContainer>
-    )
-  } else {
-    return (
-      <FreemoonContainer>
+        </Options>
+      </AdminGov>
+      <AdminGov show={isGov}>
+        <Title>
+          Update Faucet Settings
+        </Title>
         <Detail>
-          You must connect your MetaMask wallet to use this app.
+          Update settings which determine how the faucet operates. Only accessible to governance address.
         </Detail>
-      </FreemoonContainer>
-    )
-  }
+        <Bar>
+          <Input value={paramStatus.admin} placeholder="New Admin Address ..." spellCheck={false} onChange={e => setParamStatus(prevState => ({...prevState, admin: e.target.value}))}/>
+        </Bar>
+        <SubMessage>Admin</SubMessage>
+        <Bar>
+          <Input value={paramStatus.coordinator} placeholder="New Coordinator Address ..." spellCheck={false} onChange={e => setParamStatus(prevState => ({...prevState, coordinator: e.target.value}))}/>
+        </Bar>
+        <SubMessage>Coordinator</SubMessage>
+        <Bar>
+          <Input value={paramStatus.subscriptionCost} placeholder="New Subscription Cost ..." spellCheck={false} onChange={e => setParamStatus(prevState => ({...prevState, subscriptionCost: e.target.value}))}/>
+        </Bar>
+        <SubMessage>Subscription Cost (FSN)</SubMessage>
+        <Bar>
+          <Input value={paramStatus.cooldownTime} placeholder="New Cooldown Time ..." spellCheck={false} onChange={e => setParamStatus(prevState => ({...prevState, cooldownTime: e.target.value}))}/>
+        </Bar>
+        <SubMessage>Cooldown Time (sec)</SubMessage>
+        <Bar>
+          <Input value={paramStatus.payoutThreshold} placeholder="New Payout Threshold ..." spellCheck={false} onChange={e => setParamStatus(prevState => ({...prevState, payoutThreshold: e.target.value}))}/>
+        </Bar>
+        <SubMessage>Payout Threshold</SubMessage>
+        <Bar>
+          <Input value={paramStatus.payoutAmount} placeholder="New Payout Amount ..." spellCheck={false} onChange={e => setParamStatus(prevState => ({...prevState, payoutAmount: e.target.value}))}/>
+        </Bar>
+        <SubMessage>Payout Amount (FREE)</SubMessage>
+        <Bar>
+          <Input value={paramStatus.hotWalletLimit} placeholder="New Hot Wallet Limit ..." spellCheck={false} onChange={e => setParamStatus(prevState => ({...prevState, hotWalletLimit: e.target.value}))}/>
+        </Bar>
+        <SubMessage>Hot Wallet Limit (FSN)</SubMessage>
+        <Extras spaceAbove={true} onClick={() => setParams()}>
+          Update
+        </Extras>
+        <Title>
+          Withdraw Funds
+        </Title>
+        <Detail>
+          Withdraw Subscription Fees to an external wallet.
+        </Detail>
+        <Bar>
+          <Input placeholder="Recipient ..." spellCheck={false} onChange={e => setWithdrawal(prevState => ({...prevState, recipient: e.target.value}))}/>
+        </Bar>
+        <Bar>
+          <Input value={withdrawal.amount} placeholder="Amount ..." spellCheck={false} onChange={e => setWithdrawal(prevState => ({...prevState, amount: e.target.value}))}/>
+        </Bar>
+        <SubMessage>
+          {withdrawMessage}
+        </SubMessage>
+        <Extras spaceAbove={true} onClick={() => withdraw()}>
+          Withdraw
+        </Extras>
+      </AdminGov>
+    </FreemoonContainer>
+  )
 }

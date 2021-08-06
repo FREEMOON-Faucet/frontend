@@ -7,6 +7,14 @@ import { FreeContract, FmnContract, FaucetContract } from "../utils/contracts"
 
 const DashboardContainer = styled.div`
   display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+`
+
+const DashboardRow = styled.div`
+  display: flex;
   justify-content: center;
   align-items: center;
   width: 100%;
@@ -16,6 +24,15 @@ const DashboardContainer = styled.div`
     flex-direction: column;
     justify-content: space-evenly;
   }
+`
+
+const Message = styled.div`
+  width: 80%;
+  font-size: 1rem;
+  font-style: italic;
+  text-align: center;
+  margin-top: 10px;
+  margin-bottom: 20px; 
 `
 
 const DashColumn = styled.div`
@@ -213,6 +230,7 @@ export default function Dashboard({ connection }) {
 
   return (
     <DashboardContainer>
+    <DashboardRow>
       <DashColumn>
         <Box>
           <Detail>Your Balance</Detail>
@@ -314,6 +332,10 @@ export default function Dashboard({ connection }) {
           </Row>
         </Box>
       </DashColumn>
+    </DashboardRow>
+    <Message>
+      If visiting with Metamask mobile browser, be connected to Ethereum when first entering the site.
+    </Message>
     </DashboardContainer>
   )
 }

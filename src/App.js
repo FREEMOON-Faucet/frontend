@@ -145,7 +145,7 @@ function App() {
         <Tab active={active === 4} onClick={() => setActive(4)}>Bot Army</Tab>
         <Tab active={false} wallet={true} connected={accounts.length > 0} onClick={() => checkConnect() ? connect() : ""}><FaPlug size={25}/></Tab>
       </Nav>
-      <Content display={active} connection={{ accounts: accounts, provider: provider, connected: connected }}/>
+      <Content display={active} connection={{ accounts: accounts, provider: provider, connected: connected, connect: connect }}/>
     </AppContainer>
   );
 }
