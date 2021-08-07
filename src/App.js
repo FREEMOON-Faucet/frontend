@@ -64,8 +64,10 @@ const Tab = styled.li`
   display: flex;
   justify-content: center;
   align-items: center;
-  max-width: ${props => props.wallet ? "40px" : "250px"};
-  width: ${props => props.wallet ? "10%" : "25%"};
+  max-width: ${props => props.wallet ? "90px" : "250px"};
+  width: ${props => props.wallet ? "22%" : "25%"};
+  // max-width: 250px;
+  // width: 25%;
   height: 100%;
   margin: ${props => props.wallet ? "0 0 0 2%" : "0"};
   padding: 0 1%;
@@ -78,7 +80,7 @@ const Tab = styled.li`
   font-size: 20px;
   font-weight: ${props => props.active ? "600" : "300"};
   cursor: pointer;
-  opacity: ${props => props.connected || (!props.wallet && !props.active) ? "0.7" : "1"};
+  opacity: ${props => !props.wallet && !props.active ? "0.7" : "1"};
 
   @media screen and (orientation: portrait) {
     max-width: 100%;
@@ -143,7 +145,9 @@ function App() {
         <Tab active={active === 2} onClick={() => setActive(2)}>FREEMOON Faucet</Tab>
         <Tab active={active === 3} onClick={() => setActive(3)}>Airdrops</Tab>
         <Tab active={active === 4} onClick={() => setActive(4)}>Bot Army</Tab>
-        <Tab active={false} wallet={true} connected={accounts.length > 0} onClick={() => checkConnect() ? connect() : ""}><FaPlug size={25}/></Tab>
+        <Tab active={false} wallet={true} connected={accounts.length > 0} onClick={() => checkConnect() ? connect() : ""}>
+          {connected ? accounts[0].slice(0, 6) + "..." : <FaPlug size={25}/>}
+        </Tab>
       </Nav>
       <Content display={active} connection={{ accounts: accounts, provider: provider, connected: connected, connect: connect }}/>
     </AppContainer>
