@@ -160,6 +160,10 @@ const Fill = styled.div`
   }
 `
 
+const A = styled.a`
+  color: #92b4e3;
+`
+
 const Message = styled.div`
   width: 80%;
   font-size: 1rem;
@@ -216,7 +220,10 @@ export default function Freemoon({ connection }) {
   const [ claimAccount, setClaimAccount ] = useState("")
 
   const [ subMessage, setSubMessage ] = useState(SUB_DEFAULT)
-  const [ claimMessage, setClaimMessage ] = useState(CLAIM_DEFAULT)
+  const [ claimMessage, setClaimMessage ] = useState({
+    mssg: CLAIM_DEFAULT,
+    tx: ""
+  })
   const [ withdrawMessage, setWithdrawMessage ] = useState(WITHDRAW_DEFAULT)
 
   const [ isAdmin, setIsAdmin ] = useState(false)
@@ -449,22 +456,30 @@ export default function Freemoon({ connection }) {
     const faucetAbs = await FaucetContract(web3)
     const claimPaused = await faucetAbs.methods.isPaused("claim").call()
     if(claimPaused) {
-      setClaimMessage("Claiming is currently paused.")
+      setClaimMessage({
+        mssg: "Claiming is currently paused."
+      })
       return
     }
     const isSubscribed = await checkForSubscribe(claimAccount, faucetAbs)
     if(!isSubscribed) {
-      setClaimMessage("This address is not subscribed.")
+      setClaimMessage({
+        mssg: "This address is not subscribed."
+      })
       return
     }
     const nextEntry = await checkCooldownTime(claimAccount, faucetAbs)
     if(nextEntry > Date.now()/1000) {
-      setClaimMessage(`This address has claimed in the last hour. Next claim available at: ${new Date(nextEntry*1000).toUTCString()}`)
+      setClaimMessage({
+        mssg: `This address has claimed in the last hour. Next claim available at: ${new Date(nextEntry*1000).toUTCString()}`
+      })
       return
     }
 
     try {
-      setClaimMessage(LOADING)
+      setClaimMessage({
+        mssg: LOADING
+      })
       const receipt = await faucetAbs.methods.claim(claimAccount).send({from: accounts[0]})
       const { events } = receipt
       const { Entry } = events
@@ -475,14 +490,16 @@ export default function Freemoon({ connection }) {
       if(BigNumber(result["1"]).isEqualTo("0")) win = false
       else win = Boolean(BigNumber(result["0"]).isLessThanOrEqualTo(BigNumber(["1"])))
       console.log(result["0"].toString(), result["1"].toString())
-      const mssg = win ? "Congratulations! You just won 1 FMN." : "You did not win, better luck next time."
-      setClaimMessage(`
-        ${mssg}
-        Tx Hash: ${tx}
-      `)
+      const mssg = win ? "You have received 1 FMN" : "You have received 1 FREE"
+      setClaimMessage({
+        mssg: mssg + " (View in FSNEX)",
+        tx: tx
+      })
     } catch(err) {
       console.log(err.message)
-      setClaimMessage(CLAIM_DEFAULT)
+      setClaimMessage({
+        mssg: CLAIM_DEFAULT
+      })
     }
   }
 
@@ -571,6 +588,18 @@ export default function Freemoon({ connection }) {
     }
   }
 
+  const linkTxHash = () => {
+    if(claimMessage.tx) {
+      return (
+        <A href={`https://fsnex.com/transaction/${claimMessage.tx}`} target="_blank">
+          {claimMessage.mssg}
+        </A>
+      )
+    } else {
+      return claimMessage.mssg
+    }
+  }
+
   return (
     <FreemoonContainer>
       <ExtrasRow>
@@ -601,7 +630,7 @@ export default function Freemoon({ connection }) {
         </Fill>
       </Bar>
       <Message>
-        {claimMessage}
+        {linkTxHash()}
       </Message>
       <AdminGov show={isAdmin}>
         <Title>
