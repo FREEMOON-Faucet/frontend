@@ -253,13 +253,7 @@ export default function Airdrops({ connection }) {
           }
         }
 
-        if(!symbol) {
-          // try {
-            symbol = await tokenAbs.methods.symbol().call()
-          // } catch(err) {
-          //   symbol = "overflow"
-          // }
-        }
+        if(!symbol) symbol = await tokenAbs.methods.symbol().call()
 
         let balanceRequired = web3.utils.fromWei(await airdropAbs.methods.balanceRequired(addr).call())
         airdropAssets.push({
