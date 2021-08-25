@@ -1,5 +1,11 @@
 import styled from "styled-components"
 
+import ConnectGuide from "../guide/1_connect.png"
+import SeedPhraseGuide from "../guide/2_seed_phrase.png"
+import NumberGuide from "../guide/3_number.png"
+import SubscribeGuide from "../guide/4_subscribe.png"
+import ClaimGuide from "../guide/5_claim.png"
+
 const BotArmyContainer = styled.div`
   display: flex;
   flex-direction: column;
@@ -94,7 +100,7 @@ export default function BotArmy() {
       <Detail>
         Download the FREEMOON Faucet bot army Electron app to employ as many bots as you'd like to automatically claim FREE every hour.
       </Detail>
-      <A href="../icons/android-chrome-512x512.png" download="FREEMOON_Win">
+      {/* <A href="../icons/android-chrome-512x512.png" download="FREEMOON_Win">
         <Download>
           Windows
           <SubText>
@@ -117,7 +123,7 @@ export default function BotArmy() {
             .AppImage
           </SubText>
         </Download>
-      </A>
+      </A> */}
       <Title>
         Bot Set Up
       </Title>
@@ -131,7 +137,7 @@ export default function BotArmy() {
         Enter the gateway URL to connect to Fusion. The default is FREEMOON Faucet's Fusion mainnet gateway,
         but if you wish to use another please keep in mind it will only work for Fusion mainnet or Fusion testnet.
       </StepDescription>
-      <Img src=""/>
+      <Img src={ ConnectGuide }/>
       <StepHeading>
         2. Enter a Seed Phrase
       </StepHeading>
@@ -140,23 +146,22 @@ export default function BotArmy() {
         to create a new seed phrase. It is crucial to write this down, as it is impossible to recover. If you are generating a new
         seed phrase, a public/private key pair will appear. Use this private key to import your account to MetaMask.
       </StepDescription>
-      <Img src=""/>
+      <Img src={ SeedPhraseGuide }/>
       <StepHeading>
         3. Choose Number of Bots
       </StepHeading>
       <StepDescription>
         Choose a number of bots to use.
       </StepDescription>
-      <Img src=""/>
+      <Img src={ NumberGuide }/>
       <StepHeading>
-        4. Send FSN to base address
+        4. Send FSN to Base Address
       </StepHeading>
       <StepDescription>
         In order to fund the subscriptions and gas, send FSN to the base address. This is the address which pays for all gas,
         will receive all FREE
         claimed, and FMN won.
       </StepDescription>
-      <Img src=""/>
       <StepHeading>
         5. Subscribe Bots
       </StepHeading>
@@ -164,7 +169,7 @@ export default function BotArmy() {
         Subscribe all the bots chosen in step 3. Only the unsubscribed bots will be subscribed here, so if you return later
         you don't need to re-subscribe.
       </StepDescription>
-      <Img src=""/>
+      <Img src={ SubscribeGuide }/>
       <StepHeading>
         6. Start Claiming FREE
       </StepHeading>
@@ -172,7 +177,7 @@ export default function BotArmy() {
         Once all the you have the number of bots you chose subscribed, you can press play to start claiming FREE every hour. 
         Pressing stop will stop the claiming process.
       </StepDescription>
-      <Img src=""/>
+      <Img src={ ClaimGuide }/>
     </BotArmyContainer>
   )
 }
