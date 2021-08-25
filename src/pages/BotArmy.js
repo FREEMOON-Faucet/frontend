@@ -174,7 +174,7 @@ export default function BotArmy() {
         6. Start Claiming FREE
       </StepHeading>
       <StepDescription>
-        Once all the you have the number of bots you chose subscribed, you can press play to start claiming FREE every hour. 
+        Once you have the number of bots you chose all subscribed, you can press play to start claiming FREE every hour. 
         Pressing stop will stop the claiming process.
       </StepDescription>
       <Img src={ ClaimGuide }/>
