@@ -294,8 +294,14 @@ export default function Freemoon({ connection }) {
     }
   }, [ connection ])
 
-  const percentageOf = (num, den) => {
-    return num.dividedBy(den).multipliedBy(ONE_HUNDRED)
+  const addZeroes = hex => {
+    let startLength = hex.length
+    let zeroesToAdd = 64 - startLength
+    let resultHex = hex
+    for(let i = 0; i < zeroesToAdd; i++) {
+      resultHex = "0" + resultHex
+    }
+    return resultHex
   }
 
   const connectUser = async () => {
@@ -525,7 +531,7 @@ export default function Freemoon({ connection }) {
       const enteredPercent = enteredValue.toString(16)
       const maxWinPercent = maxToWinValue.toString(16)
 
-      setLotteryResults({ active: true, entered: enteredPercent, max: maxWinPercent })
+      setLotteryResults({ active: true, entered: addZeroes(enteredPercent), max: addZeroes(maxWinPercent) })
 
       const mssg = win ? "You have received 1 FMN" : "You have received 1 FREE"
       
