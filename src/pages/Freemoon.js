@@ -197,12 +197,14 @@ const Checkbox = styled.input`
 
 const WinResult = styled.div`
   display: ${ props => props.active ? "flex" : "none" };
-  justify-content: center;
+  flex-direction: column;
+  align-items: center;
   width: 80%;
-  max-width: 700px;
+  max-width: 1000px;
   margin: 20px 0;
   font-size: 1.4rem;
   text-align: center;
+  word-break: break-all;
 `
 
 
@@ -262,8 +264,8 @@ export default function Freemoon({ connection }) {
   })
   const [ lotteryResults, setLotteryResults ] = useState({
     active: false,
-    entered: ZERO,
-    max: ZERO
+    entered: "0x00",
+    max: "0x00"
   })
 
   useEffect(() => {
@@ -520,8 +522,8 @@ export default function Freemoon({ connection }) {
       if(maxToWinValue.isEqualTo(ZERO)) win = false
       else win = Boolean(enteredValue.isLessThanOrEqualTo(maxToWinValue))
 
-      const enteredPercent = percentageOf(enteredValue, MAX_UINT)
-      const maxWinPercent = percentageOf(maxToWinValue, MAX_UINT)
+      const enteredPercent = enteredValue.toString(16)
+      const maxWinPercent = maxToWinValue.toString(16)
 
       setLotteryResults({ active: true, entered: enteredPercent, max: maxWinPercent })
 
@@ -669,9 +671,10 @@ export default function Freemoon({ connection }) {
         {linkTxHash()}
       </Message>
       <WinResult active={ lotteryResults.active }>
-        Your random number: { lotteryResults.entered.toFixed(8).toString() } %
-        <br/>
-        Maximum to win FMN: { lotteryResults.max.toFixed() } %
+        Your random hash: <b>0x{ lotteryResults.entered }</b>
+      </WinResult>
+      <WinResult active={ lotteryResults.active }>
+        You needed a hash lower than <b>0x{ lotteryResults.max }</b> to win FMN.
       </WinResult>
       <AdminGov show={isAdmin}>
         <Title>
