@@ -88,6 +88,8 @@ const A = styled.a`
 `
 
 const Img = styled.img`
+  width: 80%;
+  max-width: 500px;
   margin: 5px 0;
 `
 

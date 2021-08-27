@@ -195,8 +195,25 @@ const Checkbox = styled.input`
   margin-right: 20px;
 `
 
+const WinResult = styled.div`
+  display: ${ props => props.active ? "flex" : "none" };
+  justify-content: center;
+  width: 80%;
+  max-width: 700px;
+  margin: 20px 0;
+  font-size: 1.4rem;
+  text-align: center;
+`
+
 
 export default function Freemoon({ connection }) {
+
+  const ZERO = new BigNumber("0")
+  const ONE = new BigNumber("1")
+  const ONE_HUNDRED = new BigNumber("100")
+  const TWO = new BigNumber("2")
+  const BITS = new BigNumber("256")
+  const MAX_UINT = TWO.exponentiatedBy(BITS).minus(ONE)
 
   const SUB_DEFAULT = "Subscribe connected address."
   const CLAIM_DEFAULT = "Claim FREE for connected address."
@@ -243,6 +260,11 @@ export default function Freemoon({ connection }) {
     payoutAmount: 0,
     hotWalletLimit: 0
   })
+  const [ lotteryResults, setLotteryResults ] = useState({
+    active: false,
+    entered: ZERO,
+    max: ZERO
+  })
 
   useEffect(() => {
     const checkForAdminOrGov = async () => {
@@ -269,6 +291,10 @@ export default function Freemoon({ connection }) {
       checkForAdminOrGov()
     }
   }, [ connection ])
+
+  const percentageOf = (num, den) => {
+    return num.dividedBy(den).multipliedBy(ONE_HUNDRED)
+  }
 
   const connectUser = async () => {
     try {
@@ -487,10 +513,20 @@ export default function Freemoon({ connection }) {
       const { lottery } = ret
       const result = await faucetAbs.methods.checkIfWin(lottery, tx, block).call()
       let win
-      if(BigNumber(result["1"]).isEqualTo("0")) win = false
-      else win = Boolean(BigNumber(result["0"]).isLessThanOrEqualTo(BigNumber(["1"])))
-      console.log(result["0"].toString(), result["1"].toString())
+
+      const enteredValue = new BigNumber(result["0"])
+      const maxToWinValue = new BigNumber(result["1"])
+
+      if(maxToWinValue.isEqualTo(ZERO)) win = false
+      else win = Boolean(enteredValue.isLessThanOrEqualTo(maxToWinValue))
+
+      const enteredPercent = percentageOf(enteredValue, MAX_UINT)
+      const maxWinPercent = percentageOf(maxToWinValue, MAX_UINT)
+
+      setLotteryResults({ active: true, entered: enteredPercent, max: maxWinPercent })
+
       const mssg = win ? "You have received 1 FMN" : "You have received 1 FREE"
+      
       setClaimMessage({
         mssg: mssg + " (View in FSNEX)",
         tx: tx
@@ -632,6 +668,11 @@ export default function Freemoon({ connection }) {
       <Message>
         {linkTxHash()}
       </Message>
+      <WinResult active={ lotteryResults.active }>
+        Your random number: { lotteryResults.entered.toFixed(8).toString() } %
+        <br/>
+        Maximum to win FMN: { lotteryResults.max.toFixed() } %
+      </WinResult>
       <AdminGov show={isAdmin}>
         <Title>
           Pause / Unpause
