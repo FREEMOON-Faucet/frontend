@@ -207,15 +207,17 @@ const WinResult = styled.div`
   word-break: break-all;
 `
 
+const Hash = styled.div`
+  font-size: 1.4rem;
+  font-style: normal;
+  font-weight: bold;
+  font-family: monospace;
+`
+
 
 export default function Freemoon({ connection }) {
 
   const ZERO = new BigNumber("0")
-  const ONE = new BigNumber("1")
-  const ONE_HUNDRED = new BigNumber("100")
-  const TWO = new BigNumber("2")
-  const BITS = new BigNumber("256")
-  const MAX_UINT = TWO.exponentiatedBy(BITS).minus(ONE)
 
   const SUB_DEFAULT = "Subscribe connected address."
   const CLAIM_DEFAULT = "Claim FREE for connected address."
@@ -677,10 +679,10 @@ export default function Freemoon({ connection }) {
         {linkTxHash()}
       </Message>
       <WinResult active={ lotteryResults.active }>
-        Your random hash: <b>0x{ lotteryResults.entered }</b>
+        Your random hash: <Hash>0x{ lotteryResults.entered }</Hash>
       </WinResult>
       <WinResult active={ lotteryResults.active }>
-        You needed a hash lower than <b>0x{ lotteryResults.max }</b> to win FMN.
+        You needed a hash lower than <Hash>0x{ lotteryResults.max }</Hash> to win FMN.
       </WinResult>
       <AdminGov show={isAdmin}>
         <Title>
