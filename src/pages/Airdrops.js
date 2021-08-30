@@ -4,7 +4,6 @@ import Web3 from "web3"
 import { FaParachuteBox } from "react-icons/fa"
 
 import { AirdropContract, FaucetContract } from "../utils/contracts"
-import ERC20 from "../utils/ABI/ERC20"
 
 const AirdropsContainer = styled.div`
   display: flex;
@@ -507,7 +506,28 @@ export default function Airdrops({ connection }) {
     setUpdateAsset({address: "", balanceRequired: 0})
   }
 
-  const removeAssets = async () => {}
+  const removeAssets = async () => {
+    if(!connection.connected) {
+      await connectUser()
+      return
+    }
+    
+    const web3 = new Web3(connection.provider)
+    const airdropAbs = await AirdropContract(web3)
+
+    if(!web3.utils.isAddress(removeAsset)) {
+      setRemoveAssetMessage(`Enter a valid address.`)
+      return
+    }
+    
+    try {
+      await airdropAbs.methods.removeAsset(removeAsset).send({from: connection.accounts[0]})
+      setRemoveAssetMessage(SUCCESS)
+    } catch(err) {
+      setRemoveAssetMessage(`Failed to remove ${ removeAsset }.`)
+      console.log(err.message)
+    }
+  }
 
   return (
     <AirdropsContainer>
