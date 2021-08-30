@@ -40,6 +40,7 @@ const Table = styled.table`
   border-collapse: collapse;
   width: 60%;
   max-width: 650px;
+  margin-bottom: 40px;
 `
 
 const Tr = styled.tr`
@@ -107,7 +108,7 @@ const Message = styled.div`
   font-style: italic;
   text-align: center;
   margin-top: 10px;
-  margin-bottom: 40px; 
+  margin-bottom: 20px; 
 `
 
 const AdminGov = styled.div`
@@ -192,32 +193,50 @@ const SubMessage = styled.div`
 export default function Airdrops({ connection }) {
 
   const airdropTokens = [
-    {address: "0xe96ac326ecea1a09ae6e47487c5d8717f73d5a7e", symbol: "FSN/FUSE"},
-    {address: "0xd713b42a1695d5afe40eb8d203c285e0444b12e4", symbol: "FSN/BTC"},
-    {address: "0x6a69b46e072a0c9fb8c7c08bd70aaedcc0211782", symbol: "FSN/ETH"},
-    {address: "0x7ba62ccb1d4eb01096a55c097d770e71d6470ad4", symbol: "FSN/BNB"},
-    {address: "0x3039737104055f2b3a9c1d0ecfac82e4c15f54ac", symbol: "FSN/TRX"},
-    {address: "0x2331ce79654d01e3c64282d38c965924ee804b82", symbol: "FSN/HT"},
-    {address: "0xb443d4fd37a5f58385d75ed942880fde7f23de2f", symbol: "FSN/MATIC"},
-    {address: "0x34ea7affd817743535bc828fff709e4702a15328", symbol: "FSN/OKT"},
-    {address: "0x656df9ad297c80e8233c39625a09a307e0835f1e", symbol: "FSN/FIL"},
-    {address: "0x35c2637312f69f425bba3bd01e63231091db818e", symbol: "FMN/FSN"},
-    {address: "0xeaee692277d8efd28326204751a0b689efc2720d", symbol: "FMN/FREE"},
-    {address: "0x223949f336a067629bc2e9aa6d8fc84d712c8174", symbol: "FMN/CHNG"},
-    {address: "0x6933eb3d600db893c19fece96acecb3b0ccf340a", symbol: "FREE/FSN"},
-    {address: "0x4d37f8c6d1aad7b8d1dfd128da20059cb9dae2df", symbol: "FREE/CHNG"},
-    {address: "0x60add91ae0e79416e930972594ff48ae2f34a65f", symbol: "FREE/BTC"}
+    { address: "0xed0294dbd2a0e52a09c3f38a09f6e03de2c44fcf", symbol: "CHNG" },
+    { address: "0x0c74199d22f732039e843366a236ff4f61986b32", symbol: "ANY" },
+    { address: "0xe96ac326ecea1a09ae6e47487c5d8717f73d5a7e", symbol: "FSN/FUSE" },
+    { address: "0xB80A6C4F2a279ec91921ca30da726c534462125C", symbol: "FMN" },
+    { address: "0xd713b42a1695d5afe40eb8d203c285e0444b12e4", symbol: "FSN/BTC" },
+    { address: "0x6a69b46e072a0c9fb8c7c08bd70aaedcc0211782", symbol: "FSN/ETH" },
+    { address: "0x7ba62ccb1d4eb01096a55c097d770e71d6470ad4", symbol: "FSN/BNB" },
+    { address: "0x3039737104055f2b3a9c1d0ecfac82e4c15f54ac", symbol: "FSN/TRX" },
+    { address: "0x2331ce79654d01e3c64282d38c965924ee804b82", symbol: "FSN/HT" },
+    { address: "0xb443d4fd37a5f58385d75ed942880fde7f23de2f", symbol: "FSN/MATIC" },
+    { address: "0x34ea7affd817743535bc828fff709e4702a15328", symbol: "FSN/OKT" },
+    { address: "0x656df9ad297c80e8233c39625a09a307e0835f1e", symbol: "FSN/FIL" },
+    { address: "0x35c2637312f69f425bba3bd01e63231091db818e", symbol: "FMN/FSN" },
+    { address: "0xeaee692277d8efd28326204751a0b689efc2720d", symbol: "FMN/FREE" },
+    { address: "0x223949f336a067629bc2e9aa6d8fc84d712c8174", symbol: "FMN/CHNG" },
+    { address: "0x6933eb3d600db893c19fece96acecb3b0ccf340a", symbol: "FREE/FSN" },
+    { address: "0x4d37f8c6d1aad7b8d1dfd128da20059cb9dae2df", symbol: "FREE/CHNG" },
+    { address: "0x60add91ae0e79416e930972594ff48ae2f34a65f", symbol: "FREE/BTC" },
+    { address: "0x049DdC3CD20aC7a2F6C867680F7E21De70ACA9C3", symbol: "FSN/ANY" },
+    { address: "0xe4ae0ce599aec07026aa9d252ecc0e176bc753ba", symbol: "1INCH/CHNG" },
+    { address: "0x768a4ffb1a3e06c886765012c5fb2c803c47b78d", symbol: "BabyDoge/CHNG" },
+    { address: "0x5313c775820a8a64c8b4e6e68e27d3b58c7d679b", symbol: "CAKE/CHNG" },
+    { address: "0x4683e77330101ce269d9a2ebec9390ecfd9dc073", symbol: "UNI/CHNG" },
+    { address: "0x88566fca4f6419065cf97464bd541f6970e10446", symbol: "SUSHI/CHNG" },
+    { address: "0x5a82988fe9dac7df1a008146786fe4a5e0285c71", symbol: "SHIB/CHNG" },
+    { address: "0xe3d9cc62cd460c2dc54b4d009faf1d6c1006bc78", symbol: "ZNC/CHNG" },
+    { address: "0x3761ba5117bde1176718f395c857e04ee7273650", symbol: "PQC/CHNG" },
+    { address: "0x246611e844341c5d76e6c98713ce726cb8297164", symbol: "BAKE/CHNG" },
+    { address: "0x97ec8323c09a2e810a68628904039bd7dfbe739e", symbol: "BAT/CHNG" },
+    { address: "0x200e61db4784e38e854cc3dda4545a3d08903d80", symbol: "CHE/CHNG" },
+    { address: "0xc760893d167074244a9261d17d083f8f7435d456", symbol: "LINK/CHNG" }
   ]
 
   const AIRDROP_DEFAULT = "You can only claim once per day."
   const SUCCESS = "Success!"
   const UPDATE_ASSET_DEFAULT = "Enter the address of the token to add/update along with the balance required to receive FREE airdrops."
+  const REMOVE_ASSET_DEFAULT = "Enter the address of the token to remove from FREE airdrop"
 
   const [ eligibleTokens, setEligibleTokens ] = useState([])
   const [ claimable, setClaimable ] = useState("0")
 
   const [ airdropMessage, setAirdropMessage ] = useState(AIRDROP_DEFAULT)
   const [ updateAssetMessage, setUpdateAssetMessage ] = useState(UPDATE_ASSET_DEFAULT)
+  const [ removeAssetMessage, setRemoveAssetMessage ] = useState(REMOVE_ASSET_DEFAULT)
 
   const [ isAdmin, setIsAdmin ] = useState(false)
   const [ isGov, setIsGov ] = useState(false)
@@ -234,6 +253,7 @@ export default function Airdrops({ connection }) {
     address: "",
     balanceRequired: 0
   })
+  const [ removeAsset, setRemoveAsset ] = useState("")
 
   useEffect(() => {
     const getAirdropAssets = async () => {
@@ -241,27 +261,32 @@ export default function Airdrops({ connection }) {
       const airdropAbs = await AirdropContract(web3)
       const count = Number(await airdropAbs.methods.airdropAssetCount().call())
       let airdropAssets = []
+      let balancesRequired = []
+
       for(let i = 0; i < count; i++) {
         let addr = await airdropAbs.methods.airdropAssets(i).call()
-        let tokenAbs = new web3.eth.Contract(ERC20, addr)
 
         let symbol
         for(let j = 0; j < airdropTokens.length; j++) {
           if(airdropTokens[j].address.toLowerCase() === addr.toLowerCase()) {
             symbol = airdropTokens[j].symbol
-            break
           }
         }
 
-        if(!symbol) symbol = await tokenAbs.methods.symbol().call()
-
-        let balanceRequired = web3.utils.fromWei(await airdropAbs.methods.balanceRequired(addr).call())
+        balancesRequired.push(await airdropAbs.methods.balanceRequired(addr).call())
         airdropAssets.push({
           address: addr,
-          symbol: symbol,
-          bal: balanceRequired
+          symbol,
+          bal: "0"
         })
       }
+
+      const results = await Promise.allSettled(balancesRequired)
+
+      for(let i = 0; i < airdropAssets.length; i++) {
+        airdropAssets[i].bal = web3.utils.fromWei(results[i].value)
+      }
+
       setEligibleTokens(airdropAssets)
     }
 
@@ -482,25 +507,10 @@ export default function Airdrops({ connection }) {
     setUpdateAsset({address: "", balanceRequired: 0})
   }
 
+  const removeAssets = async () => {}
+
   return (
     <AirdropsContainer>
-      <Title>
-        Airdrop Receivers
-      </Title>
-      <Detail>
-        Holders of these tokens will be able to claim a FREE airdrop once every day. The balances required to receive the airdrop are as follows:
-      </Detail>
-      <Table>
-        <thead>
-          <Tr title={true}>
-            <Td>Token</Td>
-            <Td>Balance/FREE</Td>
-          </Tr>
-        </thead>
-        <tbody>
-          {displayTokens()}
-        </tbody>
-      </Table>
       <Title>
         Claim Airdrop
       </Title>
@@ -518,6 +528,23 @@ export default function Airdrops({ connection }) {
       <Message>
         {airdropMessage}
       </Message>
+      <Title>
+        Airdrop Receivers
+      </Title>
+      <Detail>
+        Holders of these tokens will be able to claim a FREE airdrop once every day. The balances required to receive the airdrop are as follows:
+      </Detail>
+      <Table>
+        <thead>
+          <Tr title={true}>
+            <Td>Token</Td>
+            <Td>Balance/FREE</Td>
+          </Tr>
+        </thead>
+        <tbody>
+          {displayTokens()}
+        </tbody>
+      </Table>
       <AdminGov show={isAdmin}>
         <Title>
           Pause / Unpause
@@ -573,6 +600,21 @@ export default function Airdrops({ connection }) {
           {updateAssetMessage}
         </SubMessage>
         <Extras spaceAbove={true} onClick={() => setAssets()}>
+          Done
+        </Extras>
+        <Title>
+          Remove Assets
+        </Title>
+        <Detail>
+          Remove tokens from FREE airdrop list.
+        </Detail>
+        <Bar>
+          <Input value={removeAsset.address} placeholder="Token Address ..." spellCheck={false} onChange={e => setRemoveAsset(e.target.value)}/>
+        </Bar>
+        <SubMessage>
+          {removeAssetMessage}
+        </SubMessage>
+        <Extras spaceAbove={true} onClick={() => removeAssets()}>
           Done
         </Extras>
       </AdminGov>
