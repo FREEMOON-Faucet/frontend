@@ -102,7 +102,7 @@ export default function BotArmy() {
       <Detail>
         Download the FREEMOON Faucet bot army Electron app to employ as many bots as you'd like to automatically claim FREE every hour.
       </Detail>
-      {/* <A href="../icons/android-chrome-512x512.png" download="FREEMOON_Win">
+      <A href="../icons/android-chrome-512x512.png" download="FREEMOON_Win">
         <Download>
           Windows
           <SubText>
@@ -125,7 +125,7 @@ export default function BotArmy() {
             .AppImage
           </SubText>
         </Download>
-      </A> */}
+      </A>
       <Title>
         Bot Set Up
       </Title>
