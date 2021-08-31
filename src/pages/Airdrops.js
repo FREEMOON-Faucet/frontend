@@ -194,32 +194,34 @@ export default function Airdrops({ connection }) {
   const ZERO_ADDRESS = "0x0000000000000000000000000000000000000000"
 
   const airdropTokens = useMemo(() => [
+
+    { address: "0x35c2637312f69f425bba3bd01e63231091db818e", symbol: "FSN/FMN (Chainge)" },
+    { address: "0x31c2f8ffce91918e2256faa36f3dc5e609aee1e0", symbol: "FSN/FMN (Anyswap)" },
+    { address: "0x6933eb3d600db893c19fece96acecb3b0ccf340a", symbol: "FSN/FREE (Chainge)" },
+    { address: "0x468d2a99bcc779fdb1f4b3b714a2757c35d6d744", symbol: "FSN/FREE (Anyswap)"},
+    { address: "0xB80A6C4F2a279ec91921ca30da726c534462125C", symbol: "FMN" },
     { address: "0xed0294dbd2a0e52a09c3f38a09f6e03de2c44fcf", symbol: "CHNG" },
     { address: "0x0c74199d22f732039e843366a236ff4f61986b32", symbol: "ANY" },
-    { address: "0xe96ac326ecea1a09ae6e47487c5d8717f73d5a7e", symbol: "FSN/FUSE" },
-    { address: "0xB80A6C4F2a279ec91921ca30da726c534462125C", symbol: "FMN" },
-    { address: "0x35c2637312f69f425bba3bd01e63231091db818e", symbol: "FMN/FSN" },
-    { address: "0xeaee692277d8efd28326204751a0b689efc2720d", symbol: "FMN/FREE" },
-    { address: "0x223949f336a067629bc2e9aa6d8fc84d712c8174", symbol: "FMN/CHNG" },
-    { address: "0x60add91ae0e79416e930972594ff48ae2f34a65f", symbol: "FREE/BTC" },
-    { address: "0x6933eb3d600db893c19fece96acecb3b0ccf340a", symbol: "FREE/FSN" },
-    { address: "0x4d37f8c6d1aad7b8d1dfd128da20059cb9dae2df", symbol: "FREE/CHNG" },
-    { address: "0xd713b42a1695d5afe40eb8d203c285e0444b12e4", symbol: "FSN/BTC" },
-    { address: "0x6a69b46e072a0c9fb8c7c08bd70aaedcc0211782", symbol: "FSN/ETH" },
-    { address: "0x7ba62ccb1d4eb01096a55c097d770e71d6470ad4", symbol: "FSN/BNB" },
-    { address: "0x3039737104055f2b3a9c1d0ecfac82e4c15f54ac", symbol: "FSN/TRX" },
-    { address: "0x2331ce79654d01e3c64282d38c965924ee804b82", symbol: "FSN/HT" },
-    { address: "0xb443d4fd37a5f58385d75ed942880fde7f23de2f", symbol: "FSN/MATIC" },
-    { address: "0x656df9ad297c80e8233c39625a09a307e0835f1e", symbol: "FSN/FIL" },
-    { address: "0x34ea7affd817743535bc828fff709e4702a15328", symbol: "FSN/OKT" },
-    { address: "0x468d2a99bcc779fdb1f4b3b714a2757c35d6d744", symbol: "FSN/FREE"},
-    { address: "0xe3d9cc62cd460c2dc54b4d009faf1d6c1006bc78", symbol: "ZNC/CHNG" },
-    { address: "0x246611e844341c5d76e6c98713ce726cb8297164", symbol: "BAKE/CHNG" },
-    { address: "0x97ec8323c09a2e810a68628904039bd7dfbe739e", symbol: "BAT/CHNG" },
-    { address: "0x049DdC3CD20aC7a2F6C867680F7E21De70ACA9C3", symbol: "FSN/ANY" },
-    { address: "0x31c2f8ffce91918e2256faa36f3dc5e609aee1e0", symbol: "FSN/FMN" },
-    { address: "0x412a3fe4db6b5a73f7f460d10a009bec0c44b24c", symbol: "FSN/LTC" },
-    
+    { address: "0xe96ac326ecea1a09ae6e47487c5d8717f73d5a7e", symbol: "FSN/FUSE (Anyswap)" },
+    { address: "0x4d0caf7bad07667d27ce13cb820c39fb60e9e1b9", symbol: "FSN/CHNG (AnySwap)" },
+    { address: "0x223949f336a067629bc2e9aa6d8fc84d712c8174", symbol: "CHNG/FMN (Chainge)" },
+    { address: "0xeaee692277d8efd28326204751a0b689efc2720d", symbol: "FREE/FMN (Chainge)" },
+    { address: "0x60add91ae0e79416e930972594ff48ae2f34a65f", symbol: "BTC/FREE (Chainge)" },
+    { address: "0xd713b42a1695d5afe40eb8d203c285e0444b12e4", symbol: "FSN/BTC (Chainge)" },
+    { address: "0x6a69b46e072a0c9fb8c7c08bd70aaedcc0211782", symbol: "FSN/ETH (Chainge)" },
+    { address: "0x7ba62ccb1d4eb01096a55c097d770e71d6470ad4", symbol: "FSN/BNB (Chainge)" },
+    { address: "0x2331ce79654d01e3c64282d38c965924ee804b82", symbol: "FSN/HT (Chainge)" },
+    { address: "0x3039737104055f2b3a9c1d0ecfac82e4c15f54ac", symbol: "FSN/TRX (Chainge)" },
+    { address: "0x34ea7affd817743535bc828fff709e4702a15328", symbol: "FSN/OKT (Chainge)" },
+    { address: "0x656df9ad297c80e8233c39625a09a307e0835f1e", symbol: "FSN/FIL (Chainge)" },
+    { address: "0xb443d4fd37a5f58385d75ed942880fde7f23de2f", symbol: "FSN/MATIC (Chainge)" },
+    { address: "0x87d8ead810efd317af3a478506c56ab4f8969bf0", symbol: "FSN/FTM (Chainge)" },
+    { address: "0xf473900ff13d2d3b46375637ea8dc0f92b529264", symbol: "FSN/USDC (Chainge)" },
+    { address: "0x049DdC3CD20aC7a2F6C867680F7E21De70ACA9C3", symbol: "FSN/ANY (AnySwap)" },
+    { address: "0x412a3fe4db6b5a73f7f460d10a009bec0c44b24c", symbol: "FSN/LTC (AnySwap)" },
+    { address: "0x4d37f8c6d1aad7b8d1dfd128da20059cb9dae2df", symbol: "FREE/CHNG (Chainge)" },
+
+
     // { address: "0xe4ae0ce599aec07026aa9d252ecc0e176bc753ba", symbol: "1INCH/CHNG" },
     // { address: "0x768a4ffb1a3e06c886765012c5fb2c803c47b78d", symbol: "BabyDoge/CHNG" },
     // { address: "0x5313c775820a8a64c8b4e6e68e27d3b58c7d679b", symbol: "CAKE/CHNG" },
@@ -265,21 +267,36 @@ export default function Airdrops({ connection }) {
       const web3 = new Web3(connection.provider)
       const airdropAbs = await AirdropContract(web3)
       const count = Number(await airdropAbs.methods.airdropAssetCount().call())
+
       let airdropAssets = []
       let balancesRequired = []
 
-      for(let i = 0; i < count+20; i++) {
-        let currentAddr = await airdropAbs.methods.airdropAssets(i).call()
-        console.log(i)
-        console.log(currentAddr)
+      for(let i = 0; i < count; i++) {
+        let currentAddr = (await airdropAbs.methods.airdropAssets(i).call()).toLowerCase()
+
+        for(let j = 0; j < airdropTokens.length; j++) {
+          if(airdropTokens[j].address.toLowerCase() === currentAddr) {
+            airdropAssets.push({
+              address: currentAddr,
+              symbol: airdropTokens[j].symbol,
+              bal: "12345"
+            })
+          }
+        }
+
+        balancesRequired.push(airdropAbs.methods.balanceRequired(currentAddr).call())
       }
 
+
+      // array of symbols of each existing address
+      // array of promises of balances required for each address
       const results = await Promise.allSettled(balancesRequired)
 
-      for(let i = 0; i < airdropAssets.length; i++) {
+      for(let i = 0; i < results.length; i++) {
         airdropAssets[i].bal = web3.utils.fromWei(results[i].value)
       }
 
+      // console.log(airdropAssets)
       setEligibleTokens(airdropAssets)
     }
 

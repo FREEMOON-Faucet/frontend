@@ -102,7 +102,7 @@ export default function BotArmy() {
       <Detail>
         Download the FREEMOON Faucet bot army Electron app to employ as many bots as you'd like to automatically claim FREE every hour.
       </Detail>
-      <A href="../icons/android-chrome-512x512.png" download="FREEMOON_Win">
+      <A href="../icons/android-chrome-512x512.png" download="FREEMOON_Win.exe">
         <Download>
           Windows
           <SubText>
@@ -110,7 +110,7 @@ export default function BotArmy() {
           </SubText>
         </Download>
       </A>
-      <A href="../icons/android-chrome-512x512.png" download="FREEMOON_Mac">
+      <A href="../icons/android-chrome-512x512.png" download="FREEMOON_Mac.dmg">
         <Download>
           Mac OS
           <SubText>
@@ -118,7 +118,7 @@ export default function BotArmy() {
           </SubText>
         </Download>
       </A>
-      <A href="../icons/android-chrome-512x512.png" download="FREEMOON_Lin">
+      <A href="../icons/android-chrome-512x512.png" download="FREEMOON_Lin.AppImage">
         <Download>
           Linux
           <SubText>
