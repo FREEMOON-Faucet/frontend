@@ -13,6 +13,7 @@
 
 # downloads
 /src/downloads
+/public/downloads
 
 # misc
 .DS_Store
