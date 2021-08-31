@@ -26,6 +26,7 @@ const Title = styled.div`
 
 const Detail = styled.p`
   display: flex;
+  flex-direction: column;
   justify-content: center;
   width: 70%;
   max-width: 800px;
@@ -93,6 +94,13 @@ const Img = styled.img`
   margin: 5px 0;
 `
 
+const Url = styled.div`
+  font-size: 1.2rem;
+  font-family: monospace;
+  line-height: 40px;
+
+`
+
 export default function BotArmy() {
   return (
     <BotArmyContainer>
@@ -101,6 +109,11 @@ export default function BotArmy() {
       </Title>
       <Detail>
         Download the FREEMOON Faucet bot army Electron app to employ as many bots as you'd like to automatically claim FREE every hour.
+      </Detail>
+      <Detail>
+        Check that the website is
+          <Url>https://freemoonfaucet.xyz</Url>
+        before downloading any files.
       </Detail>
       <A href="../downloads/FREEMOON_Win.exe" download="FREEMOON_Win.exe">
         <Download>
