@@ -66,8 +66,6 @@ const Tab = styled.li`
   align-items: center;
   max-width: ${props => props.wallet ? "90px" : "250px"};
   width: ${props => props.wallet ? "22%" : "25%"};
-  // max-width: 250px;
-  // width: 25%;
   height: 100%;
   margin: ${props => props.wallet ? "0 0 0 2%" : "0"};
   padding: 0 1%;
@@ -91,7 +89,6 @@ const Tab = styled.li`
 `
 
 function App() {
-
   const [ accounts, setAccounts ] = useState([])
   const [ provider, setProvider ] = useState({})
   const [ connected, setConnected ] = useState(false)
@@ -143,7 +140,7 @@ function App() {
         <Tab active={active === 0} onClick={() => setActive(0)}>Dashboard</Tab>
         <Tab active={active === 1} onClick={() => setActive(1)}>Gas Faucet</Tab>
         <Tab active={active === 2} onClick={() => setActive(2)}>FREEMOON Faucet</Tab>
-        <Tab active={active === 3} onClick={() => setActive(3)}>Airdrops</Tab>
+        <Tab active={active === 3} onClick={() => setActive(3)}>Earn</Tab>
         <Tab active={active === 4} onClick={() => setActive(4)}>Bot Army</Tab>
         <Tab active={false} wallet={true} connected={accounts.length > 0} onClick={() => checkConnect() ? connect() : ""}>
           {connected ? accounts[0].slice(0, 6) + "..." : <FaPlug size={25}/>}

@@ -3,7 +3,7 @@ import styled from "styled-components"
 import Dashboard from "./Dashboard"
 import Gas from "./Gas"
 import Freemoon from "./Freemoon"
-import Airdrops from "./Airdrops"
+import Earn from "./Earn"
 import BotArmy from "./BotArmy"
 
 const ContentContainer = styled.div`
@@ -34,7 +34,7 @@ export default function Content({ display, connection }) {
   } else if(display === 3) {
     return (
       <ContentContainer>
-        <Airdrops connection={connection}/>
+        <Earn connection={connection}/>
       </ContentContainer>
     )
   } else if(display === 4) {
