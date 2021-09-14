@@ -20,9 +20,11 @@ const Popup = styled.div`
   position: fixed;
   display: flex;
   flex-direction: column;
-  margin: 35vh 35vw;
+  justify-content: space-between;
+  align-items: center;
+  margin: 40vh 35vw;
   width: 30vw;
-  height: 30vh;
+  height: 20vh;
   border-radius: 0.5rem;
   background: #fff;
   z-index: 1000;
@@ -38,14 +40,64 @@ const Title = styled.div`
   font-weight: bold;
 `
 
+const InputRow = styled.div`
+  display: flex;
+  width: 90%;
+  justify-content: space-between;
+  align-items: center;
+`
+
 const Input = styled.input`
-  `
+  width: 70%;
+  height: 50px;
+  margin: 0;
+  padding: 0;
+  text-align: center;
+  font-size: 1.8rem;
+  font-family: monospace;
+  border: 1px solid #000;
+  border-radius: 5px;
+  outline: 0;
+`
+
+const Max = styled.div`
+  width: 20%;
+  height: 50px;
+  text-align: center;
+  line-height: 50px;
+  font-size: 1rem;
+  border-radius: 5px;
+  background: #ddd;
+  cursor: pointer;
+`
+
+const ButtonRow = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 90%;
+  height: 80px;
+`
+
+const Button = styled.div`
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 48%;
+  height: 60px;
+  font-size: 1.2rem;
+  border-radius: 5px;
+  background: #92b4e3;
+  cursor: pointer;
+`
 
 
 export default function SubmitValue({ onClose, info }) {
 
   const overlay = useRef()
   const modal = useRef()
+
+  const [ val, setVal ] = useState("")
 
   useEffect(() => {
     const exitModal = e => {
@@ -65,9 +117,22 @@ export default function SubmitValue({ onClose, info }) {
       <Overlay ref={ overlay }>
         <Popup ref={ modal }>
           <Title>
-            { info.add ? "Add" : "Sub" }
+            Enter Amount
           </Title>
-          <Input/>
+          <InputRow>
+            <Input type="number" min="0" max={ info.max } value={ val } onChange={ e => setVal(e.target.value) }/>
+            <Max onClick={ () => setVal(info.max) }>
+              Max
+            </Max>
+          </InputRow>
+          <ButtonRow>
+            <Button onClick={ onClose }>
+              Cancel
+            </Button>
+            <Button onClick={ () => val > 0 ? info.confirm(String(val), info.extra) && onClose() : "" }>
+              { info.action }
+            </Button>
+          </ButtonRow>
         </Popup>
       </Overlay>
     </SubmitValueContainer>,

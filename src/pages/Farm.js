@@ -5,6 +5,7 @@ import Web3 from "web3"
 import { AirdropContract, FaucetContract } from "../utils/contracts"
 import { MdAdd, MdRemove } from "react-icons/md"
 import SubmitValue from "./SubmitValue"
+import ERC20 from "../utils/ABI/ERC20"
 
 const FarmContainer = styled.div`
   display: flex;
@@ -44,7 +45,7 @@ const BannerTitle = styled.div`
   display: flex;
   justify-content: center;
   align-items: center;
-  width: 20%;
+  width: 16.67%;
   font-size: 0.8rem;
   font-style: italic;
 `
@@ -61,7 +62,7 @@ const Symbol = styled.div`
   display: flex;
   justify-content: center;
   align-items: center;
-  width: 20%;
+  width: 16.67%;
   height: 100%;
   font-size: 1.4rem;
 `
@@ -71,7 +72,7 @@ const Info = styled.div`
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  width: 20%;
+  width: 16.67%;
   height: 100%;
   font-size: 1.2rem;
 `
@@ -112,47 +113,58 @@ const Harvest = styled.div`
 export default function Farm({ connection, list, setList }) {
 
   const ONE_DAY = new BigNumber("86400")
-  const ZERO = new BigNumber("0")
+  const TWO = new BigNumber("2")
+  const MAX = TWO.exponentiatedBy("256").minus("1")
 
-  const [ buttons, setButtons ] = useState({
-    harvest: false,
-    sub: false
-  })
+  const [ buttons, setButtons ] = useState([])
   const [ displaySubmit, setDisplaySubmit ] = useState(false)
   const [ submission, setSubmission ] = useState({
-    add: true,
-    max: ZERO
+    action: "Stake",
+    max: "0",
+    info: null,
+    confirm: null
   })
 
   useEffect(() => {
-    const loadFarms = async () => {
+    let refreshing
+
+    const connect = async () => {
       const web3 = new Web3(connection.provider)
       const airdrop = await AirdropContract(web3)
       const account = connection.accounts[0]
+      return { web3, airdrop, account }
+    }
+
+    const loadFarms = async ({ web3, airdrop, account }) => {
+      console.log(`Refreshing farms ...`)
       const farmAssetCount = await airdrop.methods.farmingAssetCount().call()
       let pending = []
       for(let i = 0; i < farmAssetCount; i++) {
         pending.push(airdrop.methods.farmingAssets(i).call())
       }
       const farmAddresses = await Promise.all(pending)
-      let symbolsPending = [], balancesPending = [], earningsPending = [], ratesPending = []
+      let symbolsPending = [], balancesPending = [], farmBalancesPending = [], earningsPending = [], ratesPending = []
       for(let i = 0; i < farmAssetCount; i++) {
+        let currentToken = new web3.eth.Contract(ERC20, farmAddresses[i])
         symbolsPending.push(airdrop.methods.assetSymbol(farmAddresses[i]).call())
-        balancesPending.push(airdrop.methods.farmBalance(account, farmAddresses[i]).call())
-        earningsPending.push(airdrop.methods.getFarmRewards(account, farmAddresses[i]).call())
         ratesPending.push(airdrop.methods.farmRewardPerSec(farmAddresses[i]).call())
+        balancesPending.push(currentToken.methods.balanceOf(account).call())
+        farmBalancesPending.push(airdrop.methods.farmBalance(account, farmAddresses[i]).call())
+        earningsPending.push(airdrop.methods.getFarmRewards(account, farmAddresses[i]).call())
       }
       let symbols = await Promise.all(symbolsPending)
-      let balances = await Promise.all(balancesPending)
-      let earnings = await Promise.all(earningsPending)
       let rates = await Promise.all(ratesPending)
+      let balances = await Promise.all(balancesPending)
+      let farmBalances = await Promise.all(farmBalancesPending)
+      let earnings = await Promise.all(earningsPending)
       let farms = farmAddresses.map((addr, index) => {
         return {
           addr,
           symbol: symbols[index],
+          rate: web3.utils.fromWei(rates[index]),
           bal: web3.utils.fromWei(balances[index]),
-          earned: web3.utils.fromWei(earnings[index]),
-          rate: web3.utils.fromWei(rates[index])
+          farmBal: web3.utils.fromWei(farmBalances[index]),
+          earned: web3.utils.fromWei(earnings[index])
         }
       })
       let buttonsActive = []
@@ -166,11 +178,63 @@ export default function Farm({ connection, list, setList }) {
       setList(farms)
     }
 
-    if(connection.connected) loadFarms()
+    const startLoading = async () => {
+      const { web3, airdrop, account } = await connect()
+      loadFarms({ web3, airdrop, account })
+      refreshing = setInterval(() => loadFarms({ web3, airdrop, account }), 10000)
+    }
+
+    if(connection.connected) startLoading()
+
+    return () => clearInterval(refreshing)
   }, [ connection, setList ])
 
-  useEffect(() => {
-  }, [ list ])
+  const stake = async (val, extra) => {
+    const web3 = new Web3(connection.provider)
+    const airdrop = await AirdropContract(web3)
+    const account = connection.accounts[0]
+    const token = new web3.eth.Contract(ERC20, extra.addr)
+
+    const allowance = new BigNumber(web3.utils.fromWei(await token.methods.allowance(account, airdrop._address).call()))
+
+    if(allowance.isLessThan(val)) {
+      try {
+        await token.methods.approve(airdrop._address, MAX).send({ from: account })
+      } catch(err) {
+        console.log(`Error approving: ${ err.message }`)
+      }
+    }
+
+    try {
+      await airdrop.methods.stake(extra.addr, web3.utils.toWei(val, "ether")).send({ from: account })
+    } catch(err) {
+      console.log(`Error staking: ${ err.message }`)
+    }
+  }
+
+  const unstake = async (val, extra) => {
+    const web3 = new Web3(connection.provider)
+    const airdrop = await AirdropContract(web3)
+    const account = connection.accounts[0]
+
+    try {
+      await airdrop.methods.unstake(extra.addr, web3.utils.toWei(val, "ether")).send({ from: account })
+    } catch(err) {
+      console.log(`Error unstaking: ${ err.message }`)
+    }
+  }
+
+  const harvest = async farm => {
+    const web3 = new Web3(connection.provider)
+    const airdrop = await AirdropContract(web3)
+    const account = connection.accounts[0]
+    
+    try {
+      await airdrop.methods.harvest(farm.addr).send({ from: account })
+    } catch(err) {
+      console.log(`Error harvesting: ${ err.message }`)
+    }
+  }
   
   if(connection.connected) {
     return (
@@ -181,10 +245,13 @@ export default function Farm({ connection, list, setList }) {
               Farm
             </BannerTitle>
             <BannerTitle>
-              Daily Rewards
+              Daily Rewards (FREE)
             </BannerTitle>
             <BannerTitle>
-              Your Position
+              Your Balance
+            </BannerTitle>
+            <BannerTitle>
+              Your Farm
             </BannerTitle>
             <BannerTitle>
               Earned
@@ -196,31 +263,44 @@ export default function Farm({ connection, list, setList }) {
                 { farm.symbol }
               </Symbol>
               <Info>
-                { (ONE_DAY.multipliedBy(farm.rate)).toString() } FREE
+                { (ONE_DAY.multipliedBy(farm.rate)).toString() } / { farm.symbol }
               </Info>
               <Info>
                 { farm.bal }
+              </Info>
+              <Info>
+                { farm.farmBal }
               </Info>
               <Info>
                 { farm.earned }
               </Info>
               <Info>
                 <InfoRow>
-                  <Harvest active={ buttons[index].harvest }>
+                  <Harvest active={ buttons[index] && buttons[index].harvest } onClick={ () => buttons[index] && buttons[index].harvest ? harvest(farm) : "" }>
                     Harvest
                   </Harvest>
                 </InfoRow>
                 <InfoRow>
                   <AddSub active={ true } onClick={() => {
                     setSubmission({
-                      add: true,
-                      max: 10
+                      action: "Stake",
+                      max: farm.bal,
+                      extra: farm,
+                      confirm: stake
                     })
                     setDisplaySubmit(true)
                   }}>
                     <MdAdd size={ 25 }/>
                   </AddSub>
-                  <AddSub active={ buttons[index].sub }>
+                  <AddSub active={ buttons[index] && buttons[index].sub } onClick={() => {
+                    setSubmission({
+                      action: "Unstake",
+                      max: farm.farmBal,
+                      extra: farm,
+                      confirm: unstake
+                    })
+                    setDisplaySubmit(true)
+                  }}>
                     <MdRemove size={ 25 }/>
                   </AddSub>
                 </InfoRow>
