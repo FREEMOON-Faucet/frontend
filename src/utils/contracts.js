@@ -80,11 +80,22 @@ const AirdropContract = async web3 => {
   return airdropContract
 }
 
+const FmnAddress = async web3 => {
+  let fmnAddress
+  const network = (await networkObj(web3)).contracts
+
+  if(network) {
+    fmnAddress = network.fmn
+  }
+
+  return fmnAddress
+}
 
 export {
   FaucetContract,
   FreeContract,
   FmnContract,
   AirdropContract,
+  FmnAddress,
   networkObj
 }

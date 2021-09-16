@@ -65,6 +65,7 @@ const Symbol = styled.div`
   width: 16.67%;
   height: 100%;
   font-size: 1.4rem;
+  font-weight: bold;
 `
 
 const Info = styled.div`
@@ -136,14 +137,14 @@ export default function Farm({ connection, list, setList }) {
     }
 
     const loadFarms = async ({ web3, airdrop, account }) => {
-      console.log(`Refreshing farms ...`)
+      console.log(`Refresh farming ...`)
       const farmAssetCount = await airdrop.methods.farmingAssetCount().call()
       let pending = []
       for(let i = 0; i < farmAssetCount; i++) {
         pending.push(airdrop.methods.farmingAssets(i).call())
       }
       const farmAddresses = await Promise.all(pending)
-      let symbolsPending = [], balancesPending = [], farmBalancesPending = [], earningsPending = [], ratesPending = []
+      let symbolsPending = [], ratesPending = [], balancesPending = [], farmBalancesPending = [], earningsPending = []
       for(let i = 0; i < farmAssetCount; i++) {
         let currentToken = new web3.eth.Contract(ERC20, farmAddresses[i])
         symbolsPending.push(airdrop.methods.assetSymbol(farmAddresses[i]).call())
@@ -171,7 +172,8 @@ export default function Farm({ connection, list, setList }) {
       for(let i = 0; i < farms.length; i++) {
         buttonsActive.push({
           harvest: Number(farms[i].earned) > 0,
-          sub: Number(farms[i].bal) > 0
+          add: Number(farms[i].bal) > 0,
+          sub: Number(farms[i].farmBal) > 0
         })
       }
       setButtons(buttonsActive)
@@ -202,6 +204,7 @@ export default function Farm({ connection, list, setList }) {
         await token.methods.approve(airdrop._address, MAX).send({ from: account })
       } catch(err) {
         console.log(`Error approving: ${ err.message }`)
+        return
       }
     }
 
@@ -245,7 +248,7 @@ export default function Farm({ connection, list, setList }) {
               Farm
             </BannerTitle>
             <BannerTitle>
-              Daily Rewards (FREE)
+              Daily FREE / Token
             </BannerTitle>
             <BannerTitle>
               Your Balance
@@ -263,7 +266,7 @@ export default function Farm({ connection, list, setList }) {
                 { farm.symbol }
               </Symbol>
               <Info>
-                { (ONE_DAY.multipliedBy(farm.rate)).toString() } / { farm.symbol }
+                { (ONE_DAY.multipliedBy(farm.rate)).toString() }
               </Info>
               <Info>
                 { farm.bal }
@@ -281,25 +284,29 @@ export default function Farm({ connection, list, setList }) {
                   </Harvest>
                 </InfoRow>
                 <InfoRow>
-                  <AddSub active={ true } onClick={() => {
-                    setSubmission({
-                      action: "Stake",
-                      max: farm.bal,
-                      extra: farm,
-                      confirm: stake
-                    })
-                    setDisplaySubmit(true)
+                  <AddSub active={ buttons[index] && buttons[index].add } onClick={() => {
+                    if(buttons[index] && buttons[index].add) {
+                      setSubmission({
+                        action: "Stake",
+                        max: farm.bal,
+                        extra: farm,
+                        confirm: stake
+                      })
+                      setDisplaySubmit(true)
+                    }
                   }}>
                     <MdAdd size={ 25 }/>
                   </AddSub>
                   <AddSub active={ buttons[index] && buttons[index].sub } onClick={() => {
-                    setSubmission({
-                      action: "Unstake",
-                      max: farm.farmBal,
-                      extra: farm,
-                      confirm: unstake
-                    })
-                    setDisplaySubmit(true)
+                    if(buttons[index] && buttons[index].sub) {
+                      setSubmission({
+                        action: "Unstake",
+                        max: farm.farmBal,
+                        extra: farm,
+                        confirm: unstake
+                      })
+                      setDisplaySubmit(true)
+                    }
                   }}>
                     <MdRemove size={ 25 }/>
                   </AddSub>
@@ -311,7 +318,7 @@ export default function Farm({ connection, list, setList }) {
 
         {
           displaySubmit
-            ? <SubmitValue onClose={ () => setDisplaySubmit(false) } info={ submission }/>
+            ? <SubmitValue onClose={ () => setDisplaySubmit(false) } submission={ submission }/>
             : ""
         }
 

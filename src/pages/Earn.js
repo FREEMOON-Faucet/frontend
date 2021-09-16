@@ -70,6 +70,12 @@ export default function Earn({ connection }) {
   const [ farmMint, setFarmMint ] = useState("farm")
   const [ farmingAssets, setFarmingAssets ] = useState([])
   const [ mintingAssets, setMintingAssets ] = useState([])
+  const [ term, setTerm ] = useState(2)
+
+  const selection = () => {
+    if(farmMint === "farm") return <Farm connection={ connection } list={ farmingAssets } setList={ setFarmingAssets }/>
+    else if(farmMint === "mint") return <Mint connection={ connection } list={ mintingAssets } setList={ setMintingAssets } term={ term } setTerm={ setTerm }/>
+  }
 
   return (
     <EarnContainer>
@@ -90,11 +96,7 @@ export default function Earn({ connection }) {
             Minting
           </Tab>
         </FarmMint>
-        {
-          farmMint === "farm"
-            ? <Farm connection={ connection } list={ farmingAssets } setList={ setFarmingAssets }/>
-            : <Mint connection={ connection } list={ mintingAssets } setList={ setMintingAssets }/>
-        }
+        { selection() }
       </Background>
     </EarnContainer>
   )

@@ -71,6 +71,15 @@ const Max = styled.div`
   cursor: pointer;
 `
 
+const Message = styled.div`
+  width: 90%;
+  height: 20px;
+  text-align: left;
+  line-height: 20px;
+  font-size: 0.8rem;
+  font-weight: bold;
+`
+
 const ButtonRow = styled.div`
   display: flex;
   justify-content: space-between;
@@ -92,7 +101,7 @@ const Button = styled.div`
 `
 
 
-export default function SubmitValue({ onClose, info }) {
+export default function SubmitValue({ onClose, submission }) {
 
   const overlay = useRef()
   const modal = useRef()
@@ -120,17 +129,20 @@ export default function SubmitValue({ onClose, info }) {
             Enter Amount
           </Title>
           <InputRow>
-            <Input type="number" min="0" max={ info.max } value={ val } onChange={ e => setVal(e.target.value) }/>
-            <Max onClick={ () => setVal(info.max) }>
+            <Input type="number" min="0" max={ submission.max } value={ val } onChange={ e => setVal(e.target.value) }/>
+            <Max onClick={ () => setVal(submission.max) }>
               Max
             </Max>
           </InputRow>
+
+          { submission.msg ? <Message>{ submission.msg }</Message> : "" }
+
           <ButtonRow>
             <Button onClick={ onClose }>
               Cancel
             </Button>
-            <Button onClick={ () => val > 0 ? info.confirm(String(val), info.extra) && onClose() : "" }>
-              { info.action }
+            <Button onClick={ () => val > 0 ? submission.confirm(String(val), submission.extra) && onClose() : "" }>
+              { submission.action }
             </Button>
           </ButtonRow>
         </Popup>
