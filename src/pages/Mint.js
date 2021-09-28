@@ -275,7 +275,7 @@ export default function Mint({ connection, list, setList, term, setTerm }) {
       console.log(`Error staking: ${ err.message }`)
     }}
   
-  if(connection.connected) {
+  if(connection.connected && connection.chainId === "0xb660") {
     return (
       <MintContainer>
         <Timeframe>
@@ -373,7 +373,7 @@ export default function Mint({ connection, list, setList, term, setTerm }) {
   } else {
     return (
       <Connected>
-        Connect Wallet
+        Connect wallet and switch to FSN Testnet.
       </Connected>
     )
   }

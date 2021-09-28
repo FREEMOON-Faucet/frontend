@@ -239,7 +239,7 @@ export default function Farm({ connection, list, setList }) {
     }
   }
   
-  if(connection.connected) {
+  if(connection.connected && connection.chainId ===  "0xb660") {
     return (
       <FarmContainer>
         <FarmList>
@@ -327,7 +327,7 @@ export default function Farm({ connection, list, setList }) {
   } else {
     return (
       <Connected>
-        Connect Wallet
+        Connect wallet and switch to FSN Testnet.
       </Connected>
     )
   }
