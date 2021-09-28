@@ -22,9 +22,9 @@ const Popup = styled.div`
   flex-direction: column;
   justify-content: space-between;
   align-items: center;
-  margin: 40vh 35vw;
+  margin: 37.5vh 35vw;
   width: 30vw;
-  height: 20vh;
+  height: 25vh;
   border-radius: 0.5rem;
   background: #fff;
   z-index: 1000;

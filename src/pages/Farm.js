@@ -114,8 +114,7 @@ const Harvest = styled.div`
 export default function Farm({ connection, list, setList }) {
 
   const ONE_DAY = new BigNumber("86400")
-  const TWO = new BigNumber("2")
-  const MAX = TWO.exponentiatedBy("256").minus("1")
+  const MAX = "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
 
   const [ buttons, setButtons ] = useState([])
   const [ displaySubmit, setDisplaySubmit ] = useState(false)
@@ -201,7 +200,7 @@ export default function Farm({ connection, list, setList }) {
 
     if(allowance.isLessThan(val)) {
       try {
-        await token.methods.approve(airdrop._address, MAX).send({ from: account })
+        await token.methods.approve(airdrop._address, web3.utils.hexToNumberString(MAX)).send({ from: account })
       } catch(err) {
         console.log(`Error approving: ${ err.message }`)
         return
