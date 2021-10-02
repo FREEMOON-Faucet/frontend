@@ -42,6 +42,19 @@ const config = {
         faucet: "0x1B1459D4B9eD19050ECb1E9959e0d94c0FBE0603",
         airdrop: "0x72EACa2D38C234344DcE423575B9f681FF28107f"
       }
+    },
+    ftmTestnet: {
+      name: "Fantom Testnet",
+      id: 4002,
+      provider: "https://rpc.testnet.fantom.network/",
+      contracts: {
+        free: "0xA8f6e1c7CdF8b457fB05C8Ef72BFE0ea408be931",
+        fmn: "0x58042c5060A99E0823a1bAA78a0e6155dd9D0297",
+        faucet: "0xfFEcFd1E82b925A2cFa8bC7e87e6293044E1b124",
+        airdrop: "0xAa51eA74438af3A60BF2914D66fA3252514fc56f",
+        chng: "0xecc9651ed70eB4c021Fc45Ee24C5811180E69569",
+        any: "0xA5Dcf2149a99a994d7865e24508b61BB7DFbAce4"
+      }
     }
   },
   abi: {

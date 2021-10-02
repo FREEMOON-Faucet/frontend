@@ -114,7 +114,8 @@ const Harvest = styled.div`
 export default function Farm({ connection, list, setList }) {
 
   const ONE_DAY = new BigNumber("86400")
-  const MAX = "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
+  const TWO = new BigNumber("2")
+  const MAX = TWO.exponentiatedBy("256").minus("1")
 
   const [ buttons, setButtons ] = useState([])
   const [ displaySubmit, setDisplaySubmit ] = useState(false)
@@ -185,12 +186,12 @@ export default function Farm({ connection, list, setList }) {
       refreshing = setInterval(() => loadFarms({ web3, airdrop, account }), 10000)
     }
 
-    if(connection.connected) startLoading()
+    if(connection.connected && (connection.chainId ===  "0xb660" || connection.chainId === "0xfa2")) startLoading()
 
     return () => clearInterval(refreshing)
   }, [ connection, setList ])
 
-  const stake = async (val, extra) => {
+  const stake = async (val, extra, index) => {
     const web3 = new Web3(connection.provider)
     const airdrop = await AirdropContract(web3)
     const account = connection.accounts[0]
@@ -200,7 +201,7 @@ export default function Farm({ connection, list, setList }) {
 
     if(allowance.isLessThan(val)) {
       try {
-        await token.methods.approve(airdrop._address, web3.utils.hexToNumberString(MAX)).send({ from: account })
+        await token.methods.approve(airdrop._address, MAX).send({ from: account })
       } catch(err) {
         console.log(`Error approving: ${ err.message }`)
         return
@@ -214,10 +215,13 @@ export default function Farm({ connection, list, setList }) {
     }
   }
 
-  const unstake = async (val, extra) => {
+  const unstake = async (val, extra, index) => {
     const web3 = new Web3(connection.provider)
     const airdrop = await AirdropContract(web3)
     const account = connection.accounts[0]
+    let buttonsReset = buttons
+    buttonsReset[index] = { harvest: false, add: false, sub: false }
+    setButtons(buttonsReset)
 
     try {
       await airdrop.methods.unstake(extra.addr, web3.utils.toWei(val, "ether")).send({ from: account })
@@ -238,7 +242,7 @@ export default function Farm({ connection, list, setList }) {
     }
   }
   
-  if(connection.connected && connection.chainId ===  "0xb660") {
+  if(connection.connected && (connection.chainId ===  "0xb660" || connection.chainId === "0xfa2")) {
     return (
       <FarmContainer>
         <FarmList>
@@ -289,6 +293,7 @@ export default function Farm({ connection, list, setList }) {
                         action: "Stake",
                         max: farm.bal,
                         extra: farm,
+                        index,
                         confirm: stake
                       })
                       setDisplaySubmit(true)
@@ -302,6 +307,7 @@ export default function Farm({ connection, list, setList }) {
                         action: "Unstake",
                         max: farm.farmBal,
                         extra: farm,
+                        index,
                         confirm: unstake
                       })
                       setDisplaySubmit(true)
@@ -317,7 +323,7 @@ export default function Farm({ connection, list, setList }) {
 
         {
           displaySubmit
-            ? <SubmitValue onClose={ () => setDisplaySubmit(false) } submission={ submission }/>
+            ? <SubmitValue onClose={ () => setDisplaySubmit(false) } submission={ submission } provider={ connection.provider }/>
             : ""
         }
 
@@ -326,7 +332,7 @@ export default function Farm({ connection, list, setList }) {
   } else {
     return (
       <Connected>
-        Connect wallet and switch to FSN Testnet.
+        Connect Wallet on FSN Testnet
       </Connected>
     )
   }

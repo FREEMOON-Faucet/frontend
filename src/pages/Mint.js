@@ -128,7 +128,8 @@ const Action = styled.div`
 
 export default function Mint({ connection, list, setList, term, setTerm }) {
 
-  const MAX = "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
+  const TWO = new BigNumber("2")
+  const MAX = TWO.exponentiatedBy("256").minus("1")
 
   const [ buttons, setButtons ] = useState([])
   const [ displaySubmit, setDisplaySubmit ] = useState(false)
@@ -160,7 +161,7 @@ export default function Mint({ connection, list, setList, term, setTerm }) {
         pending.push(airdrop.methods.mintingAssets(i).call())
       }
       const mintAddresses = await Promise.all(pending)
-      let symbolsPending = [], ratesPending = [], balancesPending = [], idsPending = [], positionsPending = [], unlockCostsPending = []
+      let symbolsPending = [], ratesPending = [], balancesPending = [], idsPending = [], positionsPending = []
       for(let i = 0; i < mintAssetCount; i++) {
         let currentToken = new web3.eth.Contract(ERC20, mintAddresses[i])
         let currentId = await airdrop.methods.getPositionId(account, mintAddresses[i], termEnd.toString()).call()
@@ -170,16 +171,13 @@ export default function Mint({ connection, list, setList, term, setTerm }) {
         balancesPending.push(currentToken.methods.balanceOf(account).call())
         idsPending.push(currentId)
         positionsPending.push(airdrop.methods.positionBalance(currentId).call())
-        unlockCostsPending.push(airdrop.methods.freeToFmn(rate).call())
       }
       let symbols = await Promise.all(symbolsPending)
       let rates = await Promise.all(ratesPending)
       let balances = await Promise.all(balancesPending)
       let ids = await Promise.all(idsPending)
       let positionBalances = await Promise.all(positionsPending)
-      let unlockCosts = await Promise.all(unlockCostsPending)
       let mints = mintAddresses.map((addr, index) => {
-        let posBal = new BigNumber(web3.utils.fromWei(positionBalances[index]))
         return {
           addr,
           termEnd,
@@ -187,8 +185,7 @@ export default function Mint({ connection, list, setList, term, setTerm }) {
           rate: relative.multipliedBy(web3.utils.fromWei(rates[index])),
           bal: web3.utils.fromWei(balances[index]),
           id: ids[index],
-          posBal: posBal.toString(),
-          unlock: web3.utils.fromWei(posBal.multipliedBy(unlockCosts[index]).toString())
+          posBal: web3.utils.fromWei(positionBalances[index])
         }
       })
       let buttonsActive = []
@@ -208,7 +205,7 @@ export default function Mint({ connection, list, setList, term, setTerm }) {
       refreshing = setInterval(() => loadMints({ web3, airdrop, account }), 10000)
     }
 
-    if(connection.connected) startLoading()
+    if(connection.connected && (connection.chainId ===  "0xb660" || connection.chainId === "0xfa2")) startLoading()
 
     return () => clearInterval(refreshing)
   }, [ connection, setList, term ])
@@ -236,7 +233,7 @@ export default function Mint({ connection, list, setList, term, setTerm }) {
 
     if(allowance.isLessThan(val)) {
       try {
-        await token.methods.approve(airdrop._address, web3.utils.hexToNumberString(MAX)).send({ from: account })
+        await token.methods.approve(airdrop._address, MAX).send({ from: account })
       } catch(err) {
         console.log(`Error approving: ${ err.message }`)
         return
@@ -246,7 +243,7 @@ export default function Mint({ connection, list, setList, term, setTerm }) {
     try {
       await airdrop.methods.lock(extra.addr, web3.utils.toWei(val, "ether"), term).send({ from: account })
     } catch(err) {
-      console.log(`Error staking: ${ err.message }`)
+      console.log(`Error locking: ${ err.message }`)
     }
   }
 
@@ -261,7 +258,7 @@ export default function Mint({ connection, list, setList, term, setTerm }) {
 
     if(allowance.isLessThan(val)) {
       try {
-        await fmn.methods.approve(airdrop._address, web3.utils.hexToNumberString(MAX)).send({ from: account })
+        await fmn.methods.approve(airdrop._address, MAX).send({ from: account })
       } catch(err) {
         console.log(`Error approving: ${ err.message }`)
         return
@@ -271,10 +268,10 @@ export default function Mint({ connection, list, setList, term, setTerm }) {
     try {
       await airdrop.methods.unlock(extra.addr, web3.utils.toWei(val, "ether"), term).send({ from: account })
     } catch(err) {
-      console.log(`Error staking: ${ err.message }`)
+      console.log(`Error unlocking: ${ err.message }`)
     }}
   
-  if(connection.connected && connection.chainId === "0xb660") {
+  if(connection.connected && (connection.chainId ===  "0xb660" || connection.chainId === "0xfa2")) {
     return (
       <MintContainer>
         <Timeframe>
@@ -347,7 +344,6 @@ export default function Mint({ connection, list, setList, term, setTerm }) {
                         action: `Unlock ${ mint.symbol }`,
                         max: mint.posBal,
                         extra: mint,
-                        msg: `Unlock cost: ${ mint.unlock } FMN`,
                         confirm: unlock
                       })
                       setDisplaySubmit(true)
@@ -363,7 +359,7 @@ export default function Mint({ connection, list, setList, term, setTerm }) {
 
           {
             displaySubmit
-              ? <SubmitValue onClose={ () => setDisplaySubmit(false) } submission={ submission }/>
+              ? <SubmitValue onClose={ () => setDisplaySubmit(false) } submission={ submission } provider={ connection.provider }/>
               : ""
           }
 
@@ -372,7 +368,7 @@ export default function Mint({ connection, list, setList, term, setTerm }) {
   } else {
     return (
       <Connected>
-        Connect wallet and switch to FSN Testnet.
+        Connect Wallet on FSN Testnet
       </Connected>
     )
   }
