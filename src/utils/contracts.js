@@ -23,6 +23,11 @@ const networkObj = async web3 => {
     return config.networks.ftmTestnet
   }
 
+  else if(id === 97) {
+    // bsc testnetwork
+    return config.networks.bscTestnet
+  }
+
   else {
     return ""
   }

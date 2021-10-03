@@ -205,7 +205,7 @@ export default function Mint({ connection, list, setList, term, setTerm }) {
       refreshing = setInterval(() => loadMints({ web3, airdrop, account }), 10000)
     }
 
-    if(connection.connected && (connection.chainId ===  "0xb660" || connection.chainId === "0xfa2")) startLoading()
+    if(connection.connected && (connection.chainId ===  "0xb660" || connection.chainId === "0x61")) startLoading()
 
     return () => clearInterval(refreshing)
   }, [ connection, setList, term ])
@@ -223,7 +223,10 @@ export default function Mint({ connection, list, setList, term, setTerm }) {
     return [ year, month, day ].join('-')
   }
 
-  const lock = async (val, extra) => {
+  const lock = async (val, extra, index) => {
+    let buttonsList = buttons
+    buttonsList[index] = { add: false, sub: false }
+    setButtons(prevState => [ ...prevState, buttonsList ])
     const web3 = new Web3(connection.provider)
     const airdrop = await AirdropContract(web3)
     const account = connection.accounts[0]
@@ -247,7 +250,10 @@ export default function Mint({ connection, list, setList, term, setTerm }) {
     }
   }
 
-  const unlock = async (val, extra) => {
+  const unlock = async (val, extra, index) => {
+    let buttonsList = buttons
+    buttonsList[index] = { add: false, sub: false }
+    setButtons(prevState => [ ...prevState, buttonsList ])
     const web3 = new Web3(connection.provider)
     const airdrop = await AirdropContract(web3)
     const account = connection.accounts[0]
@@ -266,12 +272,12 @@ export default function Mint({ connection, list, setList, term, setTerm }) {
     }
 
     try {
-      await airdrop.methods.unlock(extra.addr, web3.utils.toWei(val, "ether"), term).send({ from: account })
+      await airdrop.methods.unlock(extra.addr, term).send({ from: account })
     } catch(err) {
       console.log(`Error unlocking: ${ err.message }`)
     }}
   
-  if(connection.connected && (connection.chainId ===  "0xb660" || connection.chainId === "0xfa2")) {
+  if(connection.connected && (connection.chainId ===  "0xb660" || connection.chainId === "0x61")) {
     return (
       <MintContainer>
         <Timeframe>
@@ -329,6 +335,7 @@ export default function Mint({ connection, list, setList, term, setTerm }) {
                         action: `Lock ${ mint.symbol }`,
                         max: mint.bal,
                         extra: mint,
+                        index,
                         confirm: lock
                       })
                       setDisplaySubmit(true)
@@ -344,6 +351,7 @@ export default function Mint({ connection, list, setList, term, setTerm }) {
                         action: `Unlock ${ mint.symbol }`,
                         max: mint.posBal,
                         extra: mint,
+                        index,
                         confirm: unlock
                       })
                       setDisplaySubmit(true)

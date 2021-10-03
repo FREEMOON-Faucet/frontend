@@ -24,12 +24,12 @@ const config = {
       id: 46688,
       provider: "https://testway.freemoon.xyz/gate",
       contracts: {
-        free: "0xfFEcFd1E82b925A2cFa8bC7e87e6293044E1b124",
-        fmn: "0x028F4458F0bD1CE77f2dCC667c84dDc9AD5E3fD0",
-        faucet: "0x582689070Ba607e9787832DE3F8A786a06e9E802",
-        airdrop: "0xcCF47AdAE7279200A4f82ACA8D9A0334dCe07fAD",
-        chng: "0x2879825978D731457064344BcbF537D222c46cae",
-        any: "0x54458b6a07EbEB3a0EDDA647ecfdD5944fCFf877"
+        free: "0x82c95Ff9B7800400F24410E15AB4c946866b4c55",
+        fmn: "0x065A0553cCcF8Fbe16e8FC7dE37a28cAC91e55A5",
+        faucet: "0xE3A7Be0fF70F467Aca4474fE010F0d7B3dA78958",
+        airdrop: "0x0AfE93e4EAcEeAF6E8F6d5A25Ca978Ca06289715",
+        chng: "0x14a36F0Fd547c6859FE1E5252C15A60ba5E6dC63",
+        any: "0x77CdE21573C1c2c88B5485091cf6C69A7F227F8E"
       }
     },
     fsnMainnet: {
@@ -54,6 +54,19 @@ const config = {
         airdrop: "0xAa51eA74438af3A60BF2914D66fA3252514fc56f",
         chng: "0xecc9651ed70eB4c021Fc45Ee24C5811180E69569",
         any: "0xA5Dcf2149a99a994d7865e24508b61BB7DFbAce4"
+      }
+    },
+    bscTestnet: {
+      name: "BSC Testnet",
+      id: 97,
+      provider: "https://data-seed-prebsc-1-s1.binance.org:8545/",
+      contracts: {
+        free: "0x6aCf2F855A7D9E718acC220d3C33A8bDE8aB246b",
+        fmn: "0x760cdA149FfB7B3358b2e1E7ce9E77dd8a2D3466",
+        faucet: "0x404CCAA0b36023ac56642e0Df63007756c415aFC",
+        airdrop: "0xA1531AF726BF5768ed503220a55895C01Dad1563",
+        chng: "0x947a798F07C94ee0011000a8A39742B2B13FfD70",
+        any: "0x136e85D232B722a0408802abaB6c45c7aAFb7501"
       }
     }
   },

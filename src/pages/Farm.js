@@ -186,12 +186,15 @@ export default function Farm({ connection, list, setList }) {
       refreshing = setInterval(() => loadFarms({ web3, airdrop, account }), 10000)
     }
 
-    if(connection.connected && (connection.chainId ===  "0xb660" || connection.chainId === "0xfa2")) startLoading()
+    if(connection.connected && (connection.chainId ===  "0xb660" || connection.chainId === "0x61")) startLoading()
 
     return () => clearInterval(refreshing)
   }, [ connection, setList ])
 
   const stake = async (val, extra, index) => {
+    let buttonsList = buttons
+    buttonsList[index] = { add: false, sub: false, harvest: false }
+    setButtons(prevState => [ ...prevState, buttonsList ])
     const web3 = new Web3(connection.provider)
     const airdrop = await AirdropContract(web3)
     const account = connection.accounts[0]
@@ -216,6 +219,9 @@ export default function Farm({ connection, list, setList }) {
   }
 
   const unstake = async (val, extra, index) => {
+    let buttonsList = buttons
+    buttonsList[index] = { add: false, sub: false, harvest: false }
+    setButtons(prevState => [ ...prevState, buttonsList ])
     const web3 = new Web3(connection.provider)
     const airdrop = await AirdropContract(web3)
     const account = connection.accounts[0]
@@ -230,7 +236,10 @@ export default function Farm({ connection, list, setList }) {
     }
   }
 
-  const harvest = async farm => {
+  const harvest = async (farm, index) => {
+    let buttonsList = buttons
+    buttonsList[index] = { add: false, sub: false, harvest: false }
+    setButtons(prevState => [ ...prevState, buttonsList ])
     const web3 = new Web3(connection.provider)
     const airdrop = await AirdropContract(web3)
     const account = connection.accounts[0]
@@ -242,7 +251,7 @@ export default function Farm({ connection, list, setList }) {
     }
   }
   
-  if(connection.connected && (connection.chainId ===  "0xb660" || connection.chainId === "0xfa2")) {
+  if(connection.connected && (connection.chainId ===  "0xb660" || connection.chainId === "0x61")) {
     return (
       <FarmContainer>
         <FarmList>
@@ -282,7 +291,7 @@ export default function Farm({ connection, list, setList }) {
               </Info>
               <Info>
                 <InfoRow>
-                  <Harvest active={ buttons[index] && buttons[index].harvest } onClick={ () => buttons[index] && buttons[index].harvest ? harvest(farm) : "" }>
+                  <Harvest active={ buttons[index] && buttons[index].harvest } onClick={ () => buttons[index] && buttons[index].harvest ? harvest(farm, index) : "" }>
                     Harvest
                   </Harvest>
                 </InfoRow>
