@@ -92,6 +92,7 @@ function App() {
   const [ accounts, setAccounts ] = useState([])
   const [ provider, setProvider ] = useState({})
   const [ connected, setConnected ] = useState(false)
+  const [ chainId, setChainId ] = useState(0)
 
   const [ active, setActive ] = useState(0)
 
@@ -102,6 +103,7 @@ function App() {
         setAccounts(await ethereum.request({ method: "eth_requestAccounts" }))
         setProvider(ethereum)
         setConnected(true)
+        setChainId(await ethereum.request({ method: "eth_chainId" }))
 
         window.ethereum.on("chainChanged", () => {
           window.location.reload()
@@ -146,7 +148,7 @@ function App() {
           {connected ? accounts[0].slice(0, 6) + "..." : <FaPlug size={25}/>}
         </Tab>
       </Nav>
-      <Content display={active} connection={{ accounts: accounts, provider: provider, connected: connected, connect: connect }}/>
+      <Content display={active} connection={{ chainId: chainId, accounts: accounts, provider: provider, connected: connected, connect: connect }}/>
     </AppContainer>
   );
 }

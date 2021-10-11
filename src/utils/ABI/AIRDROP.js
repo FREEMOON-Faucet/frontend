@@ -812,11 +812,6 @@ const abi = [
         "type": "address"
       },
       {
-        "internalType": "uint256",
-        "name": "_amount",
-        "type": "uint256"
-      },
-      {
         "internalType": "enum AirdropStorageV2.Timeframe",
         "name": "_timeframe",
         "type": "uint8"

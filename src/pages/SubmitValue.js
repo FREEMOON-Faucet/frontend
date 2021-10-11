@@ -25,9 +25,9 @@ const Popup = styled.div`
   flex-direction: column;
   justify-content: space-between;
   align-items: center;
-  margin: 40vh 35vw;
+  margin: ${ props => props.inputtable ? "20vh 35vw" : "37.5vh 35vw" };
   width: 30vw;
-  height: 20vh;
+  height: ${ props => props.inputtable ? "60vh" : "25vh" };
   border-radius: 0.5rem;
   background: #fff;
   z-index: 1000;
@@ -77,9 +77,9 @@ const Max = styled.div`
 const Message = styled.div`
   width: 90%;
   height: 20px;
-  text-align: left;
+  text-align: ${ props => props.inputtable ? "left" : "center" };
   line-height: 20px;
-  font-size: 0.8rem;
+  font-size: ${ props => props.inputtable ? "0.8rem" : "1rem" };
   font-weight: bold;
 `
 
@@ -105,9 +105,12 @@ const Button = styled.div`
 
 
 export default function SubmitValue({ onClose, submission, provider }) {
+<<<<<<< HEAD
 
   const TEN = new BigNumber("10")
   const WEI = TEN.exponentiatedBy("18")
+=======
+>>>>>>> cb420ba93dbc0a9b43282824f4991696f9d0f7e7
 
   const overlay = useRef()
   const modal = useRef()
@@ -128,19 +131,45 @@ export default function SubmitValue({ onClose, submission, provider }) {
   }, [ onClose ])
 
   useEffect(() => {
+<<<<<<< HEAD
     const calc = async () => {
       const web3 = new Web3(provider)
       const airdrop = await AirdropContract(web3)
+=======
+    const connect = async () => {
+      const web3 = new Web3(provider)
+      const airdrop = await AirdropContract(web3)
+      return { web3, airdrop }
+    }
+    const calcDynamic = async () => {
+      const { web3, airdrop } = await connect()
+>>>>>>> cb420ba93dbc0a9b43282824f4991696f9d0f7e7
       const valWei = web3.utils.toWei(String(val), "ether")
       const fmnCost = new BigNumber(web3.utils.fromWei(await airdrop.methods.freeToFmn(valWei).call()))
       const converted = fmnCost.multipliedBy(submission.extra.rate).toFixed()
       setCost(converted)
     }
+<<<<<<< HEAD
     if(val > 0) calc()
     else setCost("0")
   }, [ val, provider, submission.extra.rate ])
 
   return reactDOM.createPortal(
+=======
+    const calcFixed = async () => {
+      const { web3, airdrop } = await connect()
+      const maxWei = web3.utils.toWei(submission.max, "ether")
+      const fmnCost = new BigNumber(web3.utils.fromWei(await airdrop.methods.freeToFmn(maxWei).call()))
+      const converted = fmnCost.multipliedBy(submission.extra.rate).toFixed()
+      setCost(converted)
+    }
+    if(val > 0 && submission.action.slice(0, 4) === "Lock") calcDynamic()
+    else if(submission.action.slice(0, 6) === "Unlock") calcFixed()
+    else setCost("0")
+  }, [ val, provider, submission.extra.rate, submission.action, submission.max ])
+
+  if(submission.action.slice(0, 6) !== "Unlock") return reactDOM.createPortal(
+>>>>>>> cb420ba93dbc0a9b43282824f4991696f9d0f7e7
     <SubmitValueContainer>
       <Overlay ref={ overlay }>
         <Popup ref={ modal }>
@@ -154,13 +183,38 @@ export default function SubmitValue({ onClose, submission, provider }) {
             </Max>
           </InputRow>
 
+<<<<<<< HEAD
           { Number(cost) > 0 ? <Message>Unlock Fee: { cost } FMN</Message> : "" }
+=======
+          { Number(cost) > 0 ? <Message inputtable={ true }>Unlock Fee: { cost } FMN</Message> : "" }
+>>>>>>> cb420ba93dbc0a9b43282824f4991696f9d0f7e7
 
           <ButtonRow>
             <Button onClick={ onClose }>
               Cancel
             </Button>
-            <Button onClick={ () => val > 0 ? submission.confirm(String(val), submission.extra) && onClose() : "" }>
+            <Button onClick={ () => val > 0 ? submission.confirm(String(val), submission.extra, submission.index) && onClose() : "" }>
+              { submission.action }
+            </Button>
+          </ButtonRow>
+        </Popup>
+      </Overlay>
+    </SubmitValueContainer>,
+    document.getElementById("submitValue")
+  )
+  else return reactDOM.createPortal(
+    <SubmitValueContainer>
+      <Overlay ref={ overlay }>
+        <Popup ref={ modal } inputtable={ submission.action.slice(0, 6) !== "Unlock" }>
+          <Title>
+            Unlock All
+          </Title>
+          { Number(cost) > 0 ? <Message>Unlock Fee: { cost } FMN</Message> : "" }
+          <ButtonRow>
+            <Button onClick={ onClose }>
+              Cancel
+            </Button>
+            <Button onClick={ () => submission.confirm(String(val), submission.extra, submission.index) && onClose() }>
               { submission.action }
             </Button>
           </ButtonRow>

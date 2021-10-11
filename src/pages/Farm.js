@@ -186,12 +186,15 @@ export default function Farm({ connection, list, setList }) {
       refreshing = setInterval(() => loadFarms({ web3, airdrop, account }), 10000)
     }
 
-    if(connection.connected) startLoading()
+    if(connection.connected && (connection.chainId ===  "0xb660" || connection.chainId === "0x61")) startLoading()
 
     return () => clearInterval(refreshing)
   }, [ connection, setList ])
 
-  const stake = async (val, extra) => {
+  const stake = async (val, extra, index) => {
+    let buttonsList = buttons
+    buttonsList[index] = { add: false, sub: false, harvest: false }
+    setButtons(prevState => [ ...prevState, buttonsList ])
     const web3 = new Web3(connection.provider)
     const airdrop = await AirdropContract(web3)
     const account = connection.accounts[0]
@@ -215,10 +218,16 @@ export default function Farm({ connection, list, setList }) {
     }
   }
 
-  const unstake = async (val, extra) => {
+  const unstake = async (val, extra, index) => {
+    let buttonsList = buttons
+    buttonsList[index] = { add: false, sub: false, harvest: false }
+    setButtons(prevState => [ ...prevState, buttonsList ])
     const web3 = new Web3(connection.provider)
     const airdrop = await AirdropContract(web3)
     const account = connection.accounts[0]
+    let buttonsReset = buttons
+    buttonsReset[index] = { harvest: false, add: false, sub: false }
+    setButtons(buttonsReset)
 
     try {
       await airdrop.methods.unstake(extra.addr, web3.utils.toWei(val, "ether")).send({ from: account })
@@ -227,7 +236,10 @@ export default function Farm({ connection, list, setList }) {
     }
   }
 
-  const harvest = async farm => {
+  const harvest = async (farm, index) => {
+    let buttonsList = buttons
+    buttonsList[index] = { add: false, sub: false, harvest: false }
+    setButtons(prevState => [ ...prevState, buttonsList ])
     const web3 = new Web3(connection.provider)
     const airdrop = await AirdropContract(web3)
     const account = connection.accounts[0]
@@ -239,7 +251,7 @@ export default function Farm({ connection, list, setList }) {
     }
   }
   
-  if(connection.connected) {
+  if(connection.connected && (connection.chainId ===  "0xb660" || connection.chainId === "0x61")) {
     return (
       <FarmContainer>
         <FarmList>
@@ -279,7 +291,7 @@ export default function Farm({ connection, list, setList }) {
               </Info>
               <Info>
                 <InfoRow>
-                  <Harvest active={ buttons[index] && buttons[index].harvest } onClick={ () => buttons[index] && buttons[index].harvest ? harvest(farm) : "" }>
+                  <Harvest active={ buttons[index] && buttons[index].harvest } onClick={ () => buttons[index] && buttons[index].harvest ? harvest(farm, index) : "" }>
                     Harvest
                   </Harvest>
                 </InfoRow>
@@ -290,6 +302,7 @@ export default function Farm({ connection, list, setList }) {
                         action: "Stake",
                         max: farm.bal,
                         extra: farm,
+                        index,
                         confirm: stake
                       })
                       setDisplaySubmit(true)
@@ -303,6 +316,7 @@ export default function Farm({ connection, list, setList }) {
                         action: "Unstake",
                         max: farm.farmBal,
                         extra: farm,
+                        index,
                         confirm: unstake
                       })
                       setDisplaySubmit(true)
@@ -318,7 +332,7 @@ export default function Farm({ connection, list, setList }) {
 
         {
           displaySubmit
-            ? <SubmitValue onClose={ () => setDisplaySubmit(false) } submission={ submission }/>
+            ? <SubmitValue onClose={ () => setDisplaySubmit(false) } submission={ submission } provider={ connection.provider }/>
             : ""
         }
 
@@ -327,7 +341,7 @@ export default function Farm({ connection, list, setList }) {
   } else {
     return (
       <Connected>
-        Connect Wallet
+        Connect Wallet on FSN Testnet
       </Connected>
     )
   }
