@@ -161,7 +161,7 @@ export default function Mint({ connection, list, setList, term, setTerm }) {
         pending.push(airdrop.methods.mintingAssets(i).call())
       }
       const mintAddresses = await Promise.all(pending)
-      let symbolsPending = [], ratesPending = [], balancesPending = [], idsPending = [], positionsPending = [], unlockCostsPending = []
+      let symbolsPending = [], ratesPending = [], balancesPending = [], idsPending = [], positionsPending = []
       for(let i = 0; i < mintAssetCount; i++) {
         let currentToken = new web3.eth.Contract(ERC20, mintAddresses[i])
         let currentId = await airdrop.methods.getPositionId(account, mintAddresses[i], termEnd.toString()).call()
@@ -171,16 +171,13 @@ export default function Mint({ connection, list, setList, term, setTerm }) {
         balancesPending.push(currentToken.methods.balanceOf(account).call())
         idsPending.push(currentId)
         positionsPending.push(airdrop.methods.positionBalance(currentId).call())
-        unlockCostsPending.push(airdrop.methods.freeToFmn(rate).call())
       }
       let symbols = await Promise.all(symbolsPending)
       let rates = await Promise.all(ratesPending)
       let balances = await Promise.all(balancesPending)
       let ids = await Promise.all(idsPending)
       let positionBalances = await Promise.all(positionsPending)
-      let unlockCosts = await Promise.all(unlockCostsPending)
       let mints = mintAddresses.map((addr, index) => {
-        let posBal = new BigNumber(web3.utils.fromWei(positionBalances[index]))
         return {
           addr,
           termEnd,
@@ -188,8 +185,7 @@ export default function Mint({ connection, list, setList, term, setTerm }) {
           rate: relative.multipliedBy(web3.utils.fromWei(rates[index])),
           bal: web3.utils.fromWei(balances[index]),
           id: ids[index],
-          posBal: posBal.toString(),
-          unlock: web3.utils.fromWei(posBal.multipliedBy(unlockCosts[index]).toString())
+          posBal: web3.utils.fromWei(positionBalances[index])
         }
       })
       let buttonsActive = []
@@ -348,7 +344,6 @@ export default function Mint({ connection, list, setList, term, setTerm }) {
                         action: `Unlock ${ mint.symbol }`,
                         max: mint.posBal,
                         extra: mint,
-                        msg: `Unlock cost: ${ mint.unlock } FMN`,
                         confirm: unlock
                       })
                       setDisplaySubmit(true)
@@ -364,7 +359,7 @@ export default function Mint({ connection, list, setList, term, setTerm }) {
 
           {
             displaySubmit
-              ? <SubmitValue onClose={ () => setDisplaySubmit(false) } submission={ submission }/>
+              ? <SubmitValue onClose={ () => setDisplaySubmit(false) } submission={ submission } provider={ connection.provider }/>
               : ""
           }
 

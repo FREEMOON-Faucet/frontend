@@ -1,6 +1,9 @@
 import { useState, useEffect, useRef } from "react"
 import reactDOM from "react-dom"
-import styled from "styled-components";
+import styled from "styled-components"
+import Web3 from "web3"
+import BigNumber from "bignumber.js"
+import { AirdropContract } from "../utils/contracts"
 
 const SubmitValueContainer = styled.div`
 
@@ -101,17 +104,20 @@ const Button = styled.div`
 `
 
 
-export default function SubmitValue({ onClose, submission }) {
+export default function SubmitValue({ onClose, submission, provider }) {
+
+  const TEN = new BigNumber("10")
+  const WEI = TEN.exponentiatedBy("18")
 
   const overlay = useRef()
   const modal = useRef()
 
-  const [ val, setVal ] = useState("")
+  const [ val, setVal ] = useState("0")
+  const [ cost, setCost ] = useState("0")
 
   useEffect(() => {
     const exitModal = e => {
-      if(overlay.current.contains(e.target)
-      && !modal.current.contains(e.target)) {
+      if(overlay.current.contains(e.target) && !modal.current.contains(e.target)) {
         onClose()
       }
     }
@@ -120,6 +126,19 @@ export default function SubmitValue({ onClose, submission }) {
       document.removeEventListener("mousedown", exitModal)
     }
   }, [ onClose ])
+
+  useEffect(() => {
+    const calc = async () => {
+      const web3 = new Web3(provider)
+      const airdrop = await AirdropContract(web3)
+      const valWei = web3.utils.toWei(String(val), "ether")
+      const fmnCost = new BigNumber(web3.utils.fromWei(await airdrop.methods.freeToFmn(valWei).call()))
+      const converted = fmnCost.multipliedBy(submission.extra.rate).toFixed()
+      setCost(converted)
+    }
+    if(val > 0) calc()
+    else setCost("0")
+  }, [ val, provider, submission.extra.rate ])
 
   return reactDOM.createPortal(
     <SubmitValueContainer>
@@ -135,7 +154,7 @@ export default function SubmitValue({ onClose, submission }) {
             </Max>
           </InputRow>
 
-          { submission.msg ? <Message>{ submission.msg }</Message> : "" }
+          { Number(cost) > 0 ? <Message>Unlock Fee: { cost } FMN</Message> : "" }
 
           <ButtonRow>
             <Button onClick={ onClose }>
