@@ -297,7 +297,7 @@ export default function Airdrops({ connection }) {
       }
 
       // console.log(airdropAssets)
-      setEligibleTokens(airdropAssets)
+      if(connection.connected) setEligibleTokens(airdropAssets)
     }
 
     const claimableFree = async (airdropAbs, web3) => {

@@ -105,6 +105,12 @@ const Button = styled.div`
 
 
 export default function SubmitValue({ onClose, submission, provider }) {
+<<<<<<< HEAD
+
+  const TEN = new BigNumber("10")
+  const WEI = TEN.exponentiatedBy("18")
+=======
+>>>>>>> cb420ba93dbc0a9b43282824f4991696f9d0f7e7
 
   const overlay = useRef()
   const modal = useRef()
@@ -125,6 +131,11 @@ export default function SubmitValue({ onClose, submission, provider }) {
   }, [ onClose ])
 
   useEffect(() => {
+<<<<<<< HEAD
+    const calc = async () => {
+      const web3 = new Web3(provider)
+      const airdrop = await AirdropContract(web3)
+=======
     const connect = async () => {
       const web3 = new Web3(provider)
       const airdrop = await AirdropContract(web3)
@@ -132,11 +143,19 @@ export default function SubmitValue({ onClose, submission, provider }) {
     }
     const calcDynamic = async () => {
       const { web3, airdrop } = await connect()
+>>>>>>> cb420ba93dbc0a9b43282824f4991696f9d0f7e7
       const valWei = web3.utils.toWei(String(val), "ether")
       const fmnCost = new BigNumber(web3.utils.fromWei(await airdrop.methods.freeToFmn(valWei).call()))
       const converted = fmnCost.multipliedBy(submission.extra.rate).toFixed()
       setCost(converted)
     }
+<<<<<<< HEAD
+    if(val > 0) calc()
+    else setCost("0")
+  }, [ val, provider, submission.extra.rate ])
+
+  return reactDOM.createPortal(
+=======
     const calcFixed = async () => {
       const { web3, airdrop } = await connect()
       const maxWei = web3.utils.toWei(submission.max, "ether")
@@ -150,6 +169,7 @@ export default function SubmitValue({ onClose, submission, provider }) {
   }, [ val, provider, submission.extra.rate, submission.action, submission.max ])
 
   if(submission.action.slice(0, 6) !== "Unlock") return reactDOM.createPortal(
+>>>>>>> cb420ba93dbc0a9b43282824f4991696f9d0f7e7
     <SubmitValueContainer>
       <Overlay ref={ overlay }>
         <Popup ref={ modal }>
@@ -163,7 +183,11 @@ export default function SubmitValue({ onClose, submission, provider }) {
             </Max>
           </InputRow>
 
+<<<<<<< HEAD
+          { Number(cost) > 0 ? <Message>Unlock Fee: { cost } FMN</Message> : "" }
+=======
           { Number(cost) > 0 ? <Message inputtable={ true }>Unlock Fee: { cost } FMN</Message> : "" }
+>>>>>>> cb420ba93dbc0a9b43282824f4991696f9d0f7e7
 
           <ButtonRow>
             <Button onClick={ onClose }>

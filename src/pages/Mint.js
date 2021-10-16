@@ -351,7 +351,10 @@ export default function Mint({ connection, list, setList, term, setTerm }) {
                         action: `Unlock ${ mint.symbol }`,
                         max: mint.posBal,
                         extra: mint,
+<<<<<<< HEAD
+=======
                         index,
+>>>>>>> cb420ba93dbc0a9b43282824f4991696f9d0f7e7
                         confirm: unlock
                       })
                       setDisplaySubmit(true)
