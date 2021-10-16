@@ -41,7 +41,6 @@ const Background = styled.div`
   align-items: center;
   width: 80%;
   max-width: 1000px;
-  margin-bottom: 20px;
   padding: 10px;
   border-radius: 2px;
   background: #ddd;
@@ -70,6 +69,7 @@ const AdminGov = styled.div`
   flex-direction: column;
   align-items: center;
   width: 100%;
+  margin-top: 20px;
   border: 2px solid #92b4e3;
 `
 
@@ -125,6 +125,46 @@ const Extras = styled.div`
   }
 `
 
+const Bar = styled.div`
+  display: flex;
+  justify-content: space-evenly;
+  align-items: center;
+  width: 60%;
+  max-width: 650px;
+  height: 60px;
+
+  @media screen and (orientation: portrait) {
+    flex-direction: column;
+    width: 70%;
+    height: 100px;
+  }
+`
+
+const Input = styled.input`
+  text-align: center;
+  width: 100%;
+  max-width: 550px;
+  height: 40px;
+  margin: 0;
+  padding: 0;
+  border: 2px solid black;
+  border-radius: 4px;
+  font-family: Courier New;
+  font-size: 1.2rem;
+  letter-spacing: 1px;
+
+  @media screen and (orientation: portrait) {
+    max-width: 650px;
+  }
+`
+
+const SubMessage = styled.div`
+  width: 80%;
+  font-size: 1rem;
+  font-style: italic;
+  text-align: center;
+`
+
 
 export default function Earn({ connection }) {
 
@@ -143,6 +183,29 @@ export default function Earn({ connection }) {
     lock: false,
     unlock: false
   })
+
+  const [ addFarm, setAddFarm ] = useState({
+    address: "",
+    rate: "0"
+  })
+  const [ addMint, setAddMint ] = useState({
+    address: "",
+    rate: "0"
+  })
+  const [ addSymbol, setAddSymbol ] = useState({
+    address: "",
+    symbol: ""
+  })
+  const [ removeFarm, setRemoveFarm ] = useState("")
+  const [ removeMint, setRemoveMint ] = useState("")
+  const [ newAdmin, setNewAdmin ] = useState("")
+
+  const [ addFarmMessage, setAddFarmMessage ] = useState("")
+  const [ addMintMessage, setAddMintMessage ] = useState("")
+  const [ addSymbolMessage, setAddSymbolMessage ] = useState("")
+  const [ removeFarmMessage, setRemoveFarmMessage ] = useState("")
+  const [ removeMintMessage, setRemoveMintMessage ] = useState("")
+  const [ newAdminMessage, setNewAdminMessage ] = useState("")
 
   useEffect(() => {
     const connect = async () => {
@@ -169,6 +232,13 @@ export default function Earn({ connection }) {
   const selection = () => {
     if(farmMint === "farm") return <Farm connection={ connection } list={ farmingAssets } setList={ setFarmingAssets }/>
     else if(farmMint === "mint") return <Mint connection={ connection } list={ mintingAssets } setList={ setMintingAssets } term={ term } setTerm={ setTerm }/>
+  }
+
+  const connect = async () => {
+    const web3 = new Web3(connection.provider)
+    const airdrop = await AirdropContract(web3)
+    const account = connection.accounts[0]
+    return { web3, airdrop, account }
   }
 
   const refreshPaused = async airdrop => {
@@ -222,6 +292,162 @@ export default function Earn({ connection }) {
     }
 
     await refreshPaused(airdrop)
+  }
+
+  const updateFarmAsset = async () => {
+    if(!connection.connected) {
+      await connection.connect()
+      return
+    }
+
+    const { web3, airdrop, account } = await connect()
+
+    if(!web3.utils.isAddress(addFarm.address)) {
+      setAddFarmMessage(`Invalid address.`)
+      return
+    }
+    if(Number(addFarm.rate) === 0) {
+      setAddFarmMessage(`Rate cannot be set to zero.`)
+      return
+    }
+
+    let formattedRate
+
+    try {
+      setAddFarmMessage(`Please Wait ...`)
+      await airdrop.methods.setFarmingAssets([ addFarm.address ], [ formattedRate ]).send({ from: account })
+      setAddFarmMessage(`Success!`)
+    } catch(err) {
+      setAddFarmMessage(`Could not set farm asset.`)
+      console.log(err.message)
+      return
+    }
+  }
+
+  const updateMintAsset = async () => {
+    if(!connection.connected) {
+      await connection.connect()
+      return
+    }
+
+    const { web3, airdrop, account } = await connect()
+
+    if(!web3.utils.isAddress(addMint.address)) {
+      setAddMintMessage(`Invalid address.`)
+      return
+    }
+    if(Number(addMint.rate) === 0) {
+      setAddMintMessage(`Rate cannot be set to zero.`)
+      return
+    }
+
+    let formattedRate
+
+    try {
+      setAddMintMessage(`Please Wait ...`)
+      await airdrop.methods.setMintingAssets([ addMint.address ], [ formattedRate ]).send({ from: account })
+      setAddMintMessage(`Success!`)
+    } catch(err) {
+      setAddMintMessage(`Could not set mint asset.`)
+      console.log(err.message)
+      return
+    }
+  }
+
+  const updateSymbol = async () => {
+    if(!connection.connected) {
+      await connection.connect()
+      return
+    }
+
+    const { web3, airdrop, account } = await connect()
+
+    if(!web3.utils.isAddress(addSymbol.address)) {
+      setAddSymbolMessage(`Invalid address.`)
+      return
+    }
+    if(!addSymbol.symbol) {
+      setAddSymbolMessage(`Blank symbol value.`)
+      return
+    }
+
+    try {
+      setAddSymbolMessage(`Please wait ...`)
+      await airdrop.methods.addSymbol([ addSymbol.address ], [ addSymbol.symbol ]).send({ from: account })
+      setAddSymbolMessage(`Success!`)
+    } catch(err) {
+      setAddSymbolMessage(`Could not set symbol.`)
+      console.log(err.message)
+    }
+  }
+
+  const removeFarmAsset = async () => {
+    if(!connection.connected) {
+      await connection.connect()
+      return
+    }
+
+    const { web3, airdrop, account } = await connect()
+
+    if(!web3.utils.isAddress(removeFarm)) {
+      setRemoveFarmMessage(`Invalid address.`)
+      return
+    }
+    
+    try {
+      setRemoveFarmMessage(`Please wait ...`)
+      await airdrop.methods.removeFarmAsset(removeFarm).send({ from: account })
+      setRemoveFarmMessage(`Success!`)
+    } catch(err) {
+      setRemoveFarmMessage(`Could not remove farm asset.`)
+      console.log(err.message)
+    }
+  }
+
+  const removeMintAsset = async () => {
+    if(!connection.connected) {
+      await connection.connect()
+      return
+    }
+
+    const { web3, airdrop, account } = await connect()
+
+    if(!web3.utils.isAddress(removeMint)) {
+      setRemoveMintMessage(`Invalid address.`)
+      return
+    }
+    
+    try {
+      setRemoveMintMessage(`Please wait ...`)
+      await airdrop.methods.removeMintAsset(removeMint).send({ from: account })
+      setRemoveMintMessage(`Success!`)
+    } catch(err) {
+      setRemoveMintMessage(`Could not remove mint asset.`)
+      console.log(err.message)
+    }
+  }
+
+  const changeAdmin = async () => {
+    if(!connection.connected) {
+      await connection.connect()
+      return
+    }
+
+    const { web3, airdrop, account } = await connect()
+
+    if(!web3.utils.isAddress(newAdmin)) {
+      setNewAdminMessage(`Invalid address.`)
+      return
+    }
+
+    try {
+      setNewAdminMessage(`Please wait ...`)
+      await airdrop.methods.setNewAdmin(newAdmin).send({ from: account })
+      setNewAdminMessage(`Success!`)
+    } catch(err) {
+      setNewAdminMessage(`Could not set new admin.`)
+      console.log(err.message)
+    }
   }
 
   return (
@@ -279,6 +505,140 @@ export default function Earn({ connection }) {
               Update
             </Extras>
           </Options>
+        </AdminGov>
+
+        <AdminGov show={ isGov }>
+          <Title>
+            Farm Assets
+          </Title>
+          <Detail>
+            Add new tokens and their rate to the farm. Update existing token's rates.
+          </Detail>
+          <Bar>
+            <Input value={ addFarm.address } onChange={ e => setAddFarm(prevState => ({ ...prevState, address: e.target.value })) }/>
+          </Bar>
+          <SubMessage>
+            Address
+          </SubMessage>
+          <Bar>
+            <Input value={ addFarm.rate } onChange={ e => setAddFarm(prevState => ({ ...prevState, rate: e.target.value })) }/>
+          </Bar>
+          <SubMessage>
+            Daily Rate / Token staked
+          </SubMessage>
+          <Extras spaceAbove={ true } onClick={ updateFarmAsset }>
+            Update
+          </Extras>
+          <SubMessage>
+            { addFarmMessage }
+          </SubMessage>
+
+          <Title>
+            Mint Assets
+          </Title>
+          <Detail>
+            Add new tokens and their rate to the FREE mintable tokens. Update existing token's rates.
+          </Detail>
+          <Bar>
+            <Input value={ addMint.address } onChange={ e => setAddMint(prevState => ({ ...prevState, address: e.target.value })) }/>
+          </Bar>
+          <SubMessage>
+            Address
+          </SubMessage>
+          <Bar>
+            <Input value={ addMint.rate } onChange={ e => setAddMint(prevState => ({ ...prevState, rate: e.target.value })) }/>
+          </Bar>
+          <SubMessage>
+            Daily Rate / Token locked
+          </SubMessage>
+          <Extras spaceAbove={ true } onClick={ updateMintAsset }>
+            Update
+          </Extras>
+          <SubMessage>
+            { addMintMessage }
+          </SubMessage>
+
+          <Title>
+            Symbols
+          </Title>
+          <Detail>
+            Add or update the symbols.
+          </Detail>
+          <Bar>
+            <Input value={ addSymbol.address } onChange={ e => setAddSymbol(prevState => ({ ...prevState, address: e.target.value })) }/>
+          </Bar>
+          <SubMessage>
+            Address
+          </SubMessage>
+          <Bar>
+            <Input value={ addSymbol.symbol } onChange={ e => setAddSymbol(prevState => ({ ...prevState, symbol: e.target.value })) }/>
+          </Bar>
+          <SubMessage>
+            Symbol
+          </SubMessage>
+          <Extras spaceAbove={ true } onClick={ updateSymbol }>
+            Update
+          </Extras>
+          <SubMessage>
+            { addSymbolMessage }
+          </SubMessage>
+
+          <Title>
+            Remove Farm Asset
+          </Title>
+          <Detail>
+            Remove an asset from the farm, preventing staking, unstaking, and harvesting.
+          </Detail>
+          <Bar>
+            <Input value={ removeFarm } onChange={ e => setRemoveFarm(e.target.value) }/>
+          </Bar>
+          <SubMessage>
+            Address
+          </SubMessage>
+          <Extras spaceAbove={ true } onClick={ removeFarmAsset }>
+            Remove
+          </Extras>
+          <SubMessage>
+            { removeFarmMessage }
+          </SubMessage>
+
+          <Title>
+            Remove Mint Asset
+          </Title>
+          <Detail>
+            Remove an asset from the FREE mintable tokens, preventing locking and unlocking.
+          </Detail>
+          <Bar>
+            <Input value={ removeMint } onChange={ e => setRemoveMint(e.target.value) }/>
+          </Bar>
+          <SubMessage>
+            Address
+          </SubMessage>
+          <Extras spaceAbove={ true } onClick={ removeMintAsset }>
+            Remove
+          </Extras>
+          <SubMessage>
+            { removeMintMessage }
+          </SubMessage>
+
+          <Title>
+            Set New Admin
+          </Title>
+          <Detail>
+            Update the admin address: The address that can pause, unpause, and upgrade functionality.
+          </Detail>
+          <Bar>
+            <Input value={ newAdmin } onChange={ e => setNewAdmin(e.target.value) }/>
+          </Bar>
+          <SubMessage>
+            New Admin Address
+          </SubMessage>
+          <Extras spaceAbove={ true } onClick={ changeAdmin }>
+            Update
+          </Extras>
+          <SubMessage>
+            { newAdminMessage }
+          </SubMessage>
         </AdminGov>
 
     </EarnContainer>
