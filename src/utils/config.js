@@ -24,20 +24,11 @@ const config = {
       id: 46688,
       provider: "https://testway.freemoon.xyz/gate",
       contracts: {
-<<<<<<< HEAD
         free: "0x5aE02B949E1376ed986bF2D2C679088AAbd50f31",
         fmn: "0xC2B3a8D52cC25cef410a2F06A73427CD2AF18423",
         faucet: "0x5feC85A01FA0eAB7F40Bbd29a0B741D0B0291502",
         airdrop: "0x5353BDa85839A059143A7A8a86eadE6B5Bfe9Ecf",
         pool: "0x3321d34695BABDF1F642e3939D5e9E24fd68888e"
-=======
-        free: "0x82c95Ff9B7800400F24410E15AB4c946866b4c55",
-        fmn: "0x065A0553cCcF8Fbe16e8FC7dE37a28cAC91e55A5",
-        faucet: "0xE3A7Be0fF70F467Aca4474fE010F0d7B3dA78958",
-        airdrop: "0x0AfE93e4EAcEeAF6E8F6d5A25Ca978Ca06289715",
-        chng: "0x14a36F0Fd547c6859FE1E5252C15A60ba5E6dC63",
-        any: "0x77CdE21573C1c2c88B5485091cf6C69A7F227F8E"
->>>>>>> cb420ba93dbc0a9b43282824f4991696f9d0f7e7
       }
     },
     fsnMainnet: {
