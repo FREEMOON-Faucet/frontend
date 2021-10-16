@@ -186,7 +186,7 @@ export default function Farm({ connection, list, setList }) {
       refreshing = setInterval(() => loadFarms({ web3, airdrop, account }), 10000)
     }
 
-    if(connection.connected && (connection.chainId ===  "0xb660" || connection.chainId === "0x61")) startLoading()
+    if(connection.connected && (connection.chainId ===  "0xb660" || connection.chainId === "0x7f93")) startLoading()
 
     return () => clearInterval(refreshing)
   }, [ connection, setList ])
