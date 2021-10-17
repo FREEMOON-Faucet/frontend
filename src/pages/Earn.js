@@ -2,7 +2,7 @@ import { useState, useEffect } from "react"
 import styled from "styled-components"
 import Web3 from "web3"
 import BigNumber from "bignumber.js"
-import { AirdropContract } from "../utils/contracts"
+import { AirdropContract, FreeContract } from "../utils/contracts"
 import Farm from "./Farm"
 import Mint from "./Mint"
 
@@ -187,6 +187,10 @@ export default function Earn({ connection }) {
     unlock: false
   })
 
+  const [ updateMinters, setUpdateMinters ] = useState({
+    faucet: "",
+    airdrop: ""
+  })
   const [ addFarm, setAddFarm ] = useState({
     address: "",
     rate: "0"
@@ -204,6 +208,7 @@ export default function Earn({ connection }) {
   const [ newAdmin, setNewAdmin ] = useState("")
   const [ addTerm, setAddTerm ] = useState("")
 
+  const [ updateMintersMessage, setUpdateMintersMessage ] = useState("")
   const [ addFarmMessage, setAddFarmMessage ] = useState("")
   const [ addMintMessage, setAddMintMessage ] = useState("")
   const [ addSymbolMessage, setAddSymbolMessage ] = useState("")
@@ -221,12 +226,17 @@ export default function Earn({ connection }) {
     }
 
     const checkForAdminGov = async () => {
-      const { airdrop, account } = await connect()
+      const { web3, airdrop, account } = await connect()
+      const free = await FreeContract(web3)
+      const currentFaucet = (await free.methods.faucet().call()).toLowerCase()
+      const currentAirdrop = (await free.methods.airdrop().call()).toLowerCase()
       const currentAdmin = (await airdrop.methods.admin().call()).toLowerCase()
       const currentGov = (await airdrop.methods.governance().call()).toLowerCase()
 
       if(account.toLowerCase() === currentAdmin) setIsAdmin(true)
       else if(account.toLowerCase() === currentGov) setIsGov(true)
+
+      setUpdateMinters({ faucet: currentFaucet, airdrop: currentAirdrop })
 
       await refreshPaused(airdrop)
     }
@@ -297,6 +307,35 @@ export default function Earn({ connection }) {
     }
 
     await refreshPaused(airdrop)
+  }
+
+  const updateMintInvokers = async () => {
+    if(!connection.connected) {
+      await connection.connect()
+      return
+    }
+
+    const { web3, account } = await connect()
+    const free = await FreeContract(web3)
+
+    if(!web3.utils.isAddress(updateMinters.faucet)) {
+      setUpdateMintersMessage(`Invalid faucet address.`)
+      return
+    }
+    if(!web3.utils.isAddress(updateMinters.airdrop)) {
+      setUpdateMintersMessage(`Invalid airdrop address.`)
+      return
+    }
+
+
+    try {
+      setUpdateMintersMessage(`Please wait ...`)
+      await free.methods.setMintInvokers(updateMinters.faucet, updateMinters.airdrop).send({ from: account })
+      setUpdateMintersMessage(`Success!`)
+    } catch(err) {
+      setUpdateMintersMessage(`Could not set FREE minter contracts.`)
+      console.log(err.message)
+    }
   }
 
   const updateFarmAsset = async () => {
@@ -544,6 +583,31 @@ export default function Earn({ connection }) {
         </AdminGov>
 
         <AdminGov show={ isGov }>
+          <Title>
+            Update FREE Minter Contracts
+          </Title>
+          <Detail>
+            Update the addresses of the two contracts that can mint FREE (Faucet and Aidrop).
+          </Detail>
+          <Bar>
+            <Input value={ updateMinters.faucet } onChange={ e => setUpdateMinters(prevState => ({ ...prevState, faucet: e.target.value.toLowerCase() })) }/>
+          </Bar>
+          <SubMessage>
+            Faucet
+          </SubMessage>
+          <Bar>
+            <Input value={ updateMinters.airdrop } onChange={ e => setUpdateMinters(prevState => ({ ...prevState, airdrop: e.target.value.toLowerCase() })) }/>
+          </Bar>
+          <SubMessage>
+            Airdrop
+          </SubMessage>
+          <Extras spaceAbove={ true } onClick={ updateMintInvokers }>
+            Update
+          </Extras>
+          <SubMessage>
+            { updateMintersMessage }
+          </SubMessage>
+          
           <Title>
             Farm Assets
           </Title>

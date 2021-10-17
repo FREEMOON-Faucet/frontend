@@ -375,7 +375,7 @@ export default function Mint({ connection, list, setList, term, setTerm }) {
   } else {
     return (
       <Connected>
-        Connect Wallet on FSN Testnet
+        Connect Wallet on Fusion
       </Connected>
     )
   }

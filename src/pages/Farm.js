@@ -341,7 +341,7 @@ export default function Farm({ connection, list, setList }) {
   } else {
     return (
       <Connected>
-        Connect Wallet on FSN Testnet
+        Connect Wallet on Fusion
       </Connected>
     )
   }
