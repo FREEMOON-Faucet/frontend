@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react"
 import styled from "styled-components"
 import Web3 from "web3"
+import BigNumber from "bignumber.js"
 import { AirdropContract } from "../utils/contracts"
 import Farm from "./Farm"
 import Mint from "./Mint"
@@ -168,6 +169,8 @@ const SubMessage = styled.div`
 
 export default function Earn({ connection }) {
 
+  const DAILY = new BigNumber("86400")
+
   const [ farmMint, setFarmMint ] = useState("farm")
   const [ farmingAssets, setFarmingAssets ] = useState([])
   const [ mintingAssets, setMintingAssets ] = useState([])
@@ -199,6 +202,7 @@ export default function Earn({ connection }) {
   const [ removeFarm, setRemoveFarm ] = useState("")
   const [ removeMint, setRemoveMint ] = useState("")
   const [ newAdmin, setNewAdmin ] = useState("")
+  const [ addTerm, setAddTerm ] = useState("")
 
   const [ addFarmMessage, setAddFarmMessage ] = useState("")
   const [ addMintMessage, setAddMintMessage ] = useState("")
@@ -206,6 +210,7 @@ export default function Earn({ connection }) {
   const [ removeFarmMessage, setRemoveFarmMessage ] = useState("")
   const [ removeMintMessage, setRemoveMintMessage ] = useState("")
   const [ newAdminMessage, setNewAdminMessage ] = useState("")
+  const [ addTermMessage, setAddTermMessage ] = useState("")
 
   useEffect(() => {
     const connect = async () => {
@@ -311,7 +316,10 @@ export default function Earn({ connection }) {
       return
     }
 
-    let formattedRate
+    let bigNumRate = new BigNumber(addFarm.rate)
+    let formattedRate = web3.utils.toWei(bigNumRate.dividedBy(DAILY).toFixed(10), "ether")
+
+    console.log(formattedRate)
 
     try {
       setAddFarmMessage(`Please Wait ...`)
@@ -341,7 +349,8 @@ export default function Earn({ connection }) {
       return
     }
 
-    let formattedRate
+    let bigNumRate = new BigNumber(addFarm.rate)
+    let formattedRate = web3.utils.toWei(bigNumRate.dividedBy(DAILY).toFixed(10), "ether")
 
     try {
       setAddMintMessage(`Please Wait ...`)
@@ -373,7 +382,7 @@ export default function Earn({ connection }) {
 
     try {
       setAddSymbolMessage(`Please wait ...`)
-      await airdrop.methods.addSymbol([ addSymbol.address ], [ addSymbol.symbol ]).send({ from: account })
+      await airdrop.methods.setSymbols([ addSymbol.address ], [ addSymbol.symbol ]).send({ from: account })
       setAddSymbolMessage(`Success!`)
     } catch(err) {
       setAddSymbolMessage(`Could not set symbol.`)
@@ -446,6 +455,33 @@ export default function Earn({ connection }) {
       setNewAdminMessage(`Success!`)
     } catch(err) {
       setNewAdminMessage(`Could not set new admin.`)
+      console.log(err.message)
+    }
+  }
+
+  const updateTerm = async () => {
+    if(!connection.connected) {
+      await connection.connect()
+      return
+    }
+
+    const { web3, airdrop, account } = await connect()
+
+    if(!addTerm) {
+      setAddTermMessage(`Invalid date value.`)
+      return
+    }
+
+    let date = new Date(addTerm)
+    let timestampMs = new BigNumber(date.getTime())
+    let timestampS = timestampMs.dividedBy("1000").toFixed(0)
+
+    try {
+      setAddTermMessage(`Please wait ...`)
+      await airdrop.methods.newTerm(timestampS).send({ from: account })
+      setAddTermMessage(`Success!`)
+    } catch(err) {
+      setAddTermMessage(`Could not set a new term.`)
       console.log(err.message)
     }
   }
@@ -638,6 +674,25 @@ export default function Earn({ connection }) {
           </Extras>
           <SubMessage>
             { newAdminMessage }
+          </SubMessage>
+
+          <Title>
+            Set New Term
+          </Title>
+          <Detail>
+            Set a new term. This action will move the current long term end date to medium term, and the current medium term end date to short term.
+          </Detail>
+          <Bar>
+            <Input type="date" value={ addTerm } onChange={ e => setAddTerm(e.target.value) }/>
+          </Bar>
+          <SubMessage>
+            Date
+          </SubMessage>
+          <Extras spaceAbove={ true } onClick={ updateTerm }>
+            Confirm
+          </Extras>
+          <SubMessage>
+            { addTermMessage }
           </SubMessage>
         </AdminGov>
 

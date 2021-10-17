@@ -345,7 +345,7 @@ export default function Mint({ connection, list, setList, term, setTerm }) {
                   </Action>
                 </InfoRow>
                 <InfoRow>
-                  <Action active={ buttons[index] && buttons[index].sub } onClick={() => {
+                  <Action style={{ display: "none" }} active={ buttons[index] && buttons[index].sub } onClick={() => {
                     if(buttons[index] && buttons[index].sub) {
                       setSubmission({
                         action: `Unlock ${ mint.symbol }`,
