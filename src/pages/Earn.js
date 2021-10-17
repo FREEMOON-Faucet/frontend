@@ -504,7 +504,7 @@ export default function Earn({ connection }) {
       return
     }
 
-    const { web3, airdrop, account } = await connect()
+    const { airdrop, account } = await connect()
 
     if(!addTerm) {
       setAddTermMessage(`Invalid date value.`)
