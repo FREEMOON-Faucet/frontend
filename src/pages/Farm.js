@@ -65,6 +65,7 @@ const Symbol = styled.div`
   align-items: center;
   width: 16.67%;
   height: 100%;
+  padding: 0 10%;
   font-size: 1.2rem;
   font-weight: bold;
   text-align: center;

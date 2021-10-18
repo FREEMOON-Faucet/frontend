@@ -360,8 +360,7 @@ export default function Earn({ connection }) {
 
     try {
       setAddFarmMessage(`Please Wait ...`)
-      console.log(await airdrop.methods.setFarmingAssets([ addFarm.address ], [ formattedRate ]).call())
-      // await airdrop.methods.setFarmingAssets([ addFarm.address ], [ formattedRate ]).send({ from: account })
+      await airdrop.methods.setFarmingAssets([ addFarm.address ], [ formattedRate ]).send({ from: account })
       setAddFarmMessage(`Success!`)
     } catch(err) {
       setAddFarmMessage(`Could not set farm asset.`)
@@ -387,7 +386,7 @@ export default function Earn({ connection }) {
       return
     }
 
-    let bigNumRate = new BigNumber(addFarm.rate)
+    let bigNumRate = new BigNumber(addMint.rate)
     let formattedRate = web3.utils.toWei(bigNumRate.dividedBy(DAILY).toFixed(10), "ether")
 
     try {
