@@ -79,6 +79,7 @@ const Mintable = styled.li`
   display: flex;
   width: 100%;
   height: 100px;
+  margin-top: 10px;
   border-radius: 5px;
   background: #fff;
 `
@@ -89,8 +90,9 @@ const Symbol = styled.div`
   align-items: center;
   width: 16.67%;
   height: 100%;
-  font-size: 1.4rem;
+  font-size: 1.2rem;
   font-weight: bold;
+  text-align: center;
 `
 
 const Info = styled.div`
@@ -205,7 +207,7 @@ export default function Mint({ connection, list, setList, term, setTerm }) {
       refreshing = setInterval(() => loadMints({ web3, airdrop, account }), 10000)
     }
 
-    if(connection.connected && (connection.chainId ===  "0xb660" || connection.chainId === "0x61")) startLoading()
+    if(connection.connected && (connection.chainId ===  "0xb660" || connection.chainId === "0x7f93")) startLoading()
 
     return () => clearInterval(refreshing)
   }, [ connection, setList, term ])
@@ -277,7 +279,7 @@ export default function Mint({ connection, list, setList, term, setTerm }) {
       console.log(`Error unlocking: ${ err.message }`)
     }}
   
-  if(connection.connected && (connection.chainId ===  "0xb660" || connection.chainId === "0x61")) {
+  if(connection.connected && (connection.chainId ===  "0xb660" || connection.chainId === "0x7f93")) {
     return (
       <MintContainer>
         <Timeframe>
@@ -315,7 +317,7 @@ export default function Mint({ connection, list, setList, term, setTerm }) {
                 { mint.symbol }
               </Symbol>
               <Info>
-                { mint.rate.toString() } FREE
+                { mint.rate.toFixed() }
               </Info>
               <Info>
                 { mint.bal }

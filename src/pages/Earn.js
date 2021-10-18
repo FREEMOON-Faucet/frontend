@@ -358,8 +358,6 @@ export default function Earn({ connection }) {
     let bigNumRate = new BigNumber(addFarm.rate)
     let formattedRate = web3.utils.toWei(bigNumRate.dividedBy(DAILY).toFixed(10), "ether")
 
-    console.log(formattedRate)
-
     try {
       setAddFarmMessage(`Please Wait ...`)
       await airdrop.methods.setFarmingAssets([ addFarm.address ], [ formattedRate ]).send({ from: account })

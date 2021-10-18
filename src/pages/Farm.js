@@ -54,6 +54,7 @@ const Farmable = styled.li`
   display: flex;
   width: 100%;
   height: 100px;
+  margin-top: 10px;
   border-radius: 5px;
   background: #fff;
 `
@@ -64,8 +65,9 @@ const Symbol = styled.div`
   align-items: center;
   width: 16.67%;
   height: 100%;
-  font-size: 1.4rem;
+  font-size: 1.2rem;
   font-weight: bold;
+  text-align: center;
 `
 
 const Info = styled.div`
@@ -251,7 +253,7 @@ export default function Farm({ connection, list, setList }) {
     }
   }
   
-  if(connection.connected && (connection.chainId ===  "0xb660" || connection.chainId === "0x61")) {
+  if(connection.connected && (connection.chainId ===  "0xb660" || connection.chainId === "0x7f93")) {
     return (
       <FarmContainer>
         <FarmList>
@@ -278,7 +280,7 @@ export default function Farm({ connection, list, setList }) {
                 { farm.symbol }
               </Symbol>
               <Info>
-                { (ONE_DAY.multipliedBy(farm.rate)).toString() }
+                { (ONE_DAY.multipliedBy(farm.rate)).toFixed() }
               </Info>
               <Info>
                 { farm.bal }
