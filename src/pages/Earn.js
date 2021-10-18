@@ -360,7 +360,8 @@ export default function Earn({ connection }) {
 
     try {
       setAddFarmMessage(`Please Wait ...`)
-      await airdrop.methods.setFarmingAssets([ addFarm.address ], [ formattedRate ]).send({ from: account })
+      console.log(await airdrop.methods.setFarmingAssets([ addFarm.address ], [ formattedRate ]).call())
+      // await airdrop.methods.setFarmingAssets([ addFarm.address ], [ formattedRate ]).send({ from: account })
       setAddFarmMessage(`Success!`)
     } catch(err) {
       setAddFarmMessage(`Could not set farm asset.`)
