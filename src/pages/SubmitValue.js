@@ -106,14 +106,11 @@ const Button = styled.div`
 
 export default function SubmitValue({ onClose, submission, provider }) {
 
-  const TEN = new BigNumber("10")
-  const WEI = TEN.exponentiatedBy("18")
-
   const overlay = useRef()
   const modal = useRef()
 
   const [ val, setVal ] = useState("0")
-  const [ cost, setCost ] = useState("0")
+  // const [ cost, setCost ] = useState("0")
 
   useEffect(() => {
     const exitModal = e => {
@@ -127,20 +124,20 @@ export default function SubmitValue({ onClose, submission, provider }) {
     }
   }, [ onClose ])
 
-  useEffect(() => {
-    const calc = async () => {
-      const web3 = new Web3(provider)
-      const airdrop = await AirdropContract(web3)
-      const valWei = web3.utils.toWei(String(val), "ether")
-      const fmnCost = new BigNumber(web3.utils.fromWei(await airdrop.methods.freeToFmn(valWei).call()))
-      const converted = fmnCost.multipliedBy(submission.extra.rate).toFixed()
-      setCost(converted)
-    }
-    if(val > 0) calc()
-    else setCost("0")
-  }, [ val, provider, submission.extra.rate ])
+  // useEffect(() => {
+  //   const calc = async () => {
+  //     const web3 = new Web3(provider)
+  //     const airdrop = await AirdropContract(web3)
+  //     const valWei = web3.utils.toWei(String(val), "ether")
+  //     const fmnCost = new BigNumber(web3.utils.fromWei(await airdrop.methods.freeToFmn(valWei).call()))
+  //     const converted = fmnCost.multipliedBy(submission.extra.rate).toFixed()
+  //     setCost(converted)
+  //   }
+  //   if(val > 0) calc()
+  //   else setCost("0")
+  // }, [ val, provider, submission.extra.rate ])
 
-  if(submission.action.slice(0, 6) === "Unlock") return reactDOM.createPortal(
+  return reactDOM.createPortal(
     <SubmitValueContainer>
       <Overlay ref={ overlay }>
         <Popup ref={ modal }>
@@ -154,7 +151,7 @@ export default function SubmitValue({ onClose, submission, provider }) {
             </Max>
           </InputRow>
 
-          { Number(cost) > 0 ? <Message>Unlock Fee: { cost } FMN</Message> : "" }
+          {/* { Number(cost) > 0 ? <Message>Unlock Fee: { cost } FMN</Message> : "" } */}
 
           <ButtonRow>
             <Button onClick={ onClose }>
@@ -169,25 +166,28 @@ export default function SubmitValue({ onClose, submission, provider }) {
     </SubmitValueContainer>,
     document.getElementById("submitValue")
   )
-  else return reactDOM.createPortal(
-    <SubmitValueContainer>
-      <Overlay ref={ overlay }>
-        <Popup ref={ modal } inputtable={ submission.action.slice(0, 6) !== "Unlock" }>
-          <Title>
-            Unlock All
-          </Title>
-          { Number(cost) > 0 ? <Message>Unlock Fee: { cost } FMN</Message> : "" }
-          <ButtonRow>
-            <Button onClick={ onClose }>
-              Cancel
-            </Button>
-            <Button onClick={ () => submission.confirm(String(val), submission.extra, submission.index) && onClose() }>
-              { submission.action }
-            </Button>
-          </ButtonRow>
-        </Popup>
-      </Overlay>
-    </SubmitValueContainer>,
-    document.getElementById("submitValue")
-  )
+
+  // else {}
+  
+  // return reactDOM.createPortal(
+  //   <SubmitValueContainer>
+  //     <Overlay ref={ overlay }>
+  //       <Popup ref={ modal } inputtable={ submission.action.slice(0, 6) !== "Unlock" }>
+  //         <Title>
+  //           Unlock All
+  //         </Title>
+  //         { Number(cost) > 0 ? <Message>Unlock Fee: { cost } FMN</Message> : "" }
+  //         <ButtonRow>
+  //           <Button onClick={ onClose }>
+  //             Cancel
+  //           </Button>
+  //           <Button onClick={ () => submission.confirm(String(val), submission.extra, submission.index) && onClose() }>
+  //             { submission.action }
+  //           </Button>
+  //         </ButtonRow>
+  //       </Popup>
+  //     </Overlay>
+  //   </SubmitValueContainer>,
+  //   document.getElementById("submitValue")
+  // )
 }

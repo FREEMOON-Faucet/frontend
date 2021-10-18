@@ -88,8 +88,9 @@ const Symbol = styled.div`
   display: flex;
   justify-content: center;
   align-items: center;
-  width: 16.67%;
+  width: 13.67%;
   height: 100%;
+  padding: 0 1.5%;
   font-size: 1.2rem;
   font-weight: bold;
   text-align: center;
@@ -103,7 +104,7 @@ const Info = styled.div`
   width: 16.67%;
   height: 100%;
   font-size: 1.2rem;
-  text-align: center;
+  word-break: break-all;
 `
 
 const InfoRow = styled.div`
@@ -320,7 +321,7 @@ export default function Mint({ connection, list, setList, term, setTerm }) {
                 { mint.rate.toFixed() }
               </Info>
               <Info>
-                { mint.bal }
+                { Number(mint.bal).toFixed(4) }
               </Info>
               <Info>
                 { mint.posBal }
