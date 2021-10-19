@@ -285,8 +285,7 @@ export default function Farm({ connection, list, setList }) {
                 { (ONE_DAY.multipliedBy(farm.rate)).toFixed() }
               </Info>
               <Info>
-                {/* { Number(farm.bal).toFixed(4) } */}
-                10923847102938741928374.091328741983470
+                { Number(farm.bal).toFixed(4) }
               </Info>
               <Info>
                 { farm.farmBal }

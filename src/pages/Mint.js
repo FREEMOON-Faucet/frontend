@@ -312,59 +312,63 @@ export default function Mint({ connection, list, setList, term, setTerm }) {
               Term End
             </BannerTitle>
           </Banner>
-          { list.map((mint, index) => (
-            <Mintable key={ mint.addr }>
-              <Symbol>
-                { mint.symbol }
-              </Symbol>
-              <Info>
-                { mint.rate.toFixed() }
-              </Info>
-              <Info>
-                { Number(mint.bal).toFixed(4) }
-              </Info>
-              <Info>
-                { mint.posBal }
-              </Info>
-              <Info>
-                { formatDate(mint.termEnd) }
-                {/* (new Date(mint.termEnd.multipliedBy("1000").toNumber())).toLocaleTimeString().replace("T", " ").replace("Z", "").slice(0, 19) */}
-              </Info>
-              <Info>
-                <InfoRow>
-                  <Action active={ buttons[index] && buttons[index].add } onClick={() => {
-                    if(buttons[index] && buttons[index].add) {
-                      setSubmission({
-                        action: `Lock ${ mint.symbol }`,
-                        max: mint.bal,
-                        extra: mint,
-                        index,
-                        confirm: lock
-                      })
-                      setDisplaySubmit(true)
-                    }
-                  }}>
-                    <ImLock size={ 25 }/>
-                  </Action>
-                </InfoRow>
-                <InfoRow>
-                  <Action style={{ display: "none" }} active={ buttons[index] && buttons[index].sub } onClick={() => {
-                    if(buttons[index] && buttons[index].sub) {
-                      setSubmission({
-                        action: `Unlock ${ mint.symbol }`,
-                        max: mint.posBal,
-                        extra: mint,
-                        confirm: unlock
-                      })
-                      setDisplaySubmit(true)
-                    }
-                  }}>
-                    <ImUnlocked size={ 25 }/>
-                  </Action>
-                </InfoRow>
-              </Info>
-            </Mintable>
-          )) }
+          { list.map((mint, index) => {
+            if(mint.termEnd.toNumber() >= (Date.now()/1000)) {
+              return (
+                <Mintable key={ mint.addr }>
+                  <Symbol>
+                    { mint.symbol }
+                  </Symbol>
+                  <Info>
+                    { mint.rate.toFixed() }
+                  </Info>
+                  <Info>
+                    { Number(mint.bal).toFixed(4) }
+                  </Info>
+                  <Info>
+                    { mint.posBal }
+                  </Info>
+                  <Info>
+                    { formatDate(mint.termEnd) }
+                    {/* (new Date(mint.termEnd.multipliedBy("1000").toNumber())).toLocaleTimeString().replace("T", " ").replace("Z", "").slice(0, 19) */}
+                  </Info>
+                  <Info>
+                    <InfoRow>
+                      <Action active={ buttons[index] && buttons[index].add } onClick={() => {
+                        if(buttons[index] && buttons[index].add) {
+                          setSubmission({
+                            action: `Lock ${ mint.symbol }`,
+                            max: mint.bal,
+                            extra: mint,
+                            index,
+                            confirm: lock
+                          })
+                          setDisplaySubmit(true)
+                        }
+                      }}>
+                        <ImLock size={ 25 }/>
+                      </Action>
+                    </InfoRow>
+                    <InfoRow>
+                      <Action style={{ display: "none" }} active={ buttons[index] && buttons[index].sub } onClick={() => {
+                        if(buttons[index] && buttons[index].sub) {
+                          setSubmission({
+                            action: `Unlock ${ mint.symbol }`,
+                            max: mint.posBal,
+                            extra: mint,
+                            confirm: unlock
+                          })
+                          setDisplaySubmit(true)
+                        }
+                      }}>
+                        <ImUnlocked size={ 25 }/>
+                      </Action>
+                    </InfoRow>
+                  </Info>
+                </Mintable>
+              )
+            } else return null
+          }) }
         </MintList>
 
           {
