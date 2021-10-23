@@ -112,11 +112,6 @@ export default function SubmitValue({ onClose, submission, provider }) {
   const [ val, setVal ] = useState("0")
   // const [ cost, setCost ] = useState("0")
 
-
-  useEffect(() => {
-    console.log(val)
-  }, [ val ])
-
   useEffect(() => {
     const exitModal = e => {
       if(overlay.current.contains(e.target) && !modal.current.contains(e.target)) {
@@ -144,7 +139,7 @@ export default function SubmitValue({ onClose, submission, provider }) {
 
   const confirm = ({ value, extra, index, cfrm }) => {
     // extra operations
-    console.log(value)
+    onClose()
     cfrm(value, extra, index)
   }
 
@@ -168,7 +163,7 @@ export default function SubmitValue({ onClose, submission, provider }) {
             <Button onClick={ onClose }>
               Cancel
             </Button>
-            <Button onClick={ () => val > 0 ? confirm({ value: String(val), extra: submission.extra, index: submission.index, cfrm: submission.confirm }) && onClose() : "" }>
+            <Button onClick={ () => val > 0 ? confirm({ value: String(val), extra: submission.extra, index: submission.index, cfrm: submission.confirm }) : "" }>
               { submission.action }
             </Button>
           </ButtonRow>

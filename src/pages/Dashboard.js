@@ -106,7 +106,7 @@ export default function Dashboard({ connection }) {
   const [ balanceSupply, setBalanceSupply ] = useState({
     freeBal: "0",
     fmnBal: "0",
-    freeSupply: "0",
+    freeSupply: 0,
     fmnSupply: "0"
   })
   const [ freemoonFaucet, setFreemoonFaucet ] = useState({
@@ -164,7 +164,7 @@ export default function Dashboard({ connection }) {
     setBalanceSupply({
       freeBal: web3.utils.fromWei(freeBal),
       fmnBal: web3.utils.fromWei(fmnBal),
-      freeSupply: web3.utils.fromWei(freeSupply),
+      freeSupply: parseInt(web3.utils.fromWei(freeSupply)),
       fmnSupply: web3.utils.fromWei(fmnSupply)
     })
   }
@@ -245,7 +245,7 @@ export default function Dashboard({ connection }) {
           <Detail>Active Supply</Detail>
           <Row>
             <Label>FREE Supply</Label>
-            <Number>{balanceSupply.freeSupply.toString()}</Number>
+            <Number>{balanceSupply.freeSupply.toFixed(0)}</Number>
           </Row>
           <Row>
             <Label>FMN Supply</Label>
