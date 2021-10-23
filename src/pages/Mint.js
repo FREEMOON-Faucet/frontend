@@ -131,8 +131,7 @@ const Action = styled.div`
 
 export default function Mint({ connection, list, setList, term, setTerm }) {
 
-  const TWO = new BigNumber("2")
-  const MAX = TWO.exponentiatedBy("256").minus("1")
+  const MAX = "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
 
   const [ buttons, setButtons ] = useState([])
   const [ displaySubmit, setDisplaySubmit ] = useState(false)

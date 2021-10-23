@@ -118,8 +118,6 @@ const Harvest = styled.div`
 export default function Farm({ connection, list, setList }) {
 
   const ONE_DAY = new BigNumber("86400")
-  const TWO = new BigNumber("2")
-  // const MAX = TWO.exponentiatedBy("256").minus("1")
   const MAX = "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
 
   const [ buttons, setButtons ] = useState([])
@@ -204,7 +202,6 @@ export default function Farm({ connection, list, setList }) {
     const airdrop = await AirdropContract(web3)
     const account = connection.accounts[0]
     const token = new web3.eth.Contract(ERC20, extra.addr)
-    // await token.methods.approve(airdrop._address, 0).send({ from: account })
     const allowance = new BigNumber(web3.utils.fromWei(await token.methods.allowance(account, airdrop._address).call()))
 
     if(allowance.isLessThan(val)) {
