@@ -112,6 +112,11 @@ export default function SubmitValue({ onClose, submission, provider }) {
   const [ val, setVal ] = useState("0")
   // const [ cost, setCost ] = useState("0")
 
+
+  useEffect(() => {
+    console.log(val)
+  }, [ val ])
+
   useEffect(() => {
     const exitModal = e => {
       if(overlay.current.contains(e.target) && !modal.current.contains(e.target)) {
@@ -137,6 +142,12 @@ export default function SubmitValue({ onClose, submission, provider }) {
   //   else setCost("0")
   // }, [ val, provider, submission.extra.rate ])
 
+  const confirm = ({ value, extra, index, cfrm }) => {
+    // extra operations
+    console.log(value)
+    cfrm(value, extra, index)
+  }
+
   return reactDOM.createPortal(
     <SubmitValueContainer>
       <Overlay ref={ overlay }>
@@ -157,7 +168,7 @@ export default function SubmitValue({ onClose, submission, provider }) {
             <Button onClick={ onClose }>
               Cancel
             </Button>
-            <Button onClick={ () => val > 0 ? submission.confirm(String(val), submission.extra, submission.index) && onClose() : "" }>
+            <Button onClick={ () => val > 0 ? confirm({ value: String(val), extra: submission.extra, index: submission.index, cfrm: submission.confirm }) && onClose() : "" }>
               { submission.action }
             </Button>
           </ButtonRow>

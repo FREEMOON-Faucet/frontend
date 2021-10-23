@@ -119,7 +119,8 @@ export default function Farm({ connection, list, setList }) {
 
   const ONE_DAY = new BigNumber("86400")
   const TWO = new BigNumber("2")
-  const MAX = TWO.exponentiatedBy("256").minus("1")
+  // const MAX = TWO.exponentiatedBy("256").minus("1")
+  const MAX = "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
 
   const [ buttons, setButtons ] = useState([])
   const [ displaySubmit, setDisplaySubmit ] = useState(false)
@@ -203,7 +204,7 @@ export default function Farm({ connection, list, setList }) {
     const airdrop = await AirdropContract(web3)
     const account = connection.accounts[0]
     const token = new web3.eth.Contract(ERC20, extra.addr)
-
+    // await token.methods.approve(airdrop._address, 0).send({ from: account })
     const allowance = new BigNumber(web3.utils.fromWei(await token.methods.allowance(account, airdrop._address).call()))
 
     if(allowance.isLessThan(val)) {
@@ -282,16 +283,16 @@ export default function Farm({ connection, list, setList }) {
                 { farm.symbol }
               </Symbol>
               <Info>
-                { (ONE_DAY.multipliedBy(farm.rate)).toFixed() }
+                { (ONE_DAY.multipliedBy(farm.rate)).toFixed(5) }
               </Info>
               <Info>
                 { Number(farm.bal).toFixed(4) }
               </Info>
               <Info>
-                { farm.farmBal }
+                { Number(farm.farmBal).toFixed(4) }
               </Info>
               <Info>
-                { farm.earned }
+                { Number(farm.earned).toFixed(4) }
               </Info>
               <Info>
                 <InfoRow>

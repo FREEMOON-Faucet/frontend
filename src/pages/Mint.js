@@ -320,13 +320,13 @@ export default function Mint({ connection, list, setList, term, setTerm }) {
                     { mint.symbol }
                   </Symbol>
                   <Info>
-                    { mint.rate.toFixed() }
+                    { mint.rate.toFixed(5) }
                   </Info>
                   <Info>
                     { Number(mint.bal).toFixed(4) }
                   </Info>
                   <Info>
-                    { mint.posBal }
+                    { Number(mint.posBal).toFixed(4) }
                   </Info>
                   <Info>
                     { formatDate(mint.termEnd) }
