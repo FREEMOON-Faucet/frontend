@@ -6,6 +6,7 @@ import { AirdropContract, FaucetContract } from "../utils/contracts"
 import { MdAdd, MdRemove } from "react-icons/md"
 import SubmitValue from "./SubmitValue"
 import ERC20 from "../utils/ABI/ERC20"
+import { poolAddrs, poolABI } from "../utils/pricePools"
 
 const FarmContainer = styled.div`
   display: flex;
@@ -129,6 +130,13 @@ export default function Farm({ connection, list, setList }) {
     confirm: null
   })
 
+  const [ prices, setPrices ] = useState({
+    free: "",
+    fmn: "",
+    fsn: "",
+    any: ""
+  })
+
   useEffect(() => {
     let refreshing
 
@@ -183,10 +191,30 @@ export default function Farm({ connection, list, setList }) {
       setList(farms)
     }
 
+    const getPrices = async () => {
+      console.log(`loading`)
+      const { web3 } = await connect()
+      // const freeUsdt = new web3.eth.Contract(poolABI, poolAddrs.freeUsdt)
+      // const fmnUsdt = new web3.eth.Contract(poolABI, poolAddrs.fmnUsdt)
+      // const fsnUsdt = new web3.eth.Contract(poolABI, poolAddrs.fsnUsdt)
+      // const fsnBusd = new web3.eth.Contract(poolABI, poolAddrs.fsnBusd)
+      // const anyFsn = new web3.eth.Contract(poolABI, poolAddrs.anyFsn)
+
+      setPrices({
+        free: "",
+        fmn: "",
+        fsn: "",
+        any: ""
+      })
+    }
+
     const startLoading = async () => {
       const { web3, airdrop, account } = await connect()
       loadFarms({ web3, airdrop, account })
-      refreshing = setInterval(() => loadFarms({ web3, airdrop, account }), 10000)
+      refreshing = setInterval(() => {
+        getPrices()
+        loadFarms({ web3, airdrop, account })
+      }, 10000)
     }
 
     if(connection.connected && (connection.chainId ===  "0xb660" || connection.chainId === "0x7f93")) startLoading()
