@@ -2,8 +2,14 @@ const poolAddrs = {
   freeUsdt: "0xFC9A1368318D271B6599B695F8dcaDf56cCa1978",
   fmnUsdt: "0x2630EFb01Ccf4caB5C5CeB781e01cE7e9A18dD55",
   // fsnUsdt: "0x4a7d2ef2e539096d5afa546fffcb5251055854a8",
-  fsnBusd: "0xf16931793c16bbe0a490c0d96a4938e57b9c9f69",
-  anyFsn: "0x049ddc3cd20ac7a2f6c867680f7e21de70aca9c3"
+  // fsnBusd: "0xf16931793c16bbe0a490c0d96a4938e57b9c9f69",
+  fsnUsdt: "0x29a257778d22c1325a59768e1262253233a62030",
+  anyFsn: "0x049ddc3cd20ac7a2f6c867680f7e21de70aca9c3",
+  
+  fsn: "0x5555e10d7e69b7246af27fe1a93466a84c199b6f",
+  fmn: "0xb80a6c4f2a279ec91921ca30da726c534462125c",
+  free: "0x6403eDe3b7604ea4883670c670BeA288618BD5F2",
+  usdt: "0x9c061dc72c0203f643f9a348dfcce3e73b5bd2c8"
 }
 
 const poolABI = [
@@ -923,4 +929,6 @@ const poolABI = [
     }
 ]
 
-module.exports = { poolAddrs, poolABI }
+const uniswapV1 = [{"name": "NewExchange", "inputs": [{"type": "address", "name": "token", "indexed": true}, {"type": "address", "name": "exchange", "indexed": true}], "anonymous": false, "type": "event"}, {"name": "initializeFactory", "outputs": [], "inputs": [{"type": "address", "name": "template"}], "constant": false, "payable": false, "type": "function", "gas": 35725}, {"name": "createExchange", "outputs": [{"type": "address", "name": "out"}], "inputs": [{"type": "address", "name": "token"}], "constant": false, "payable": false, "type": "function", "gas": 187911}, {"name": "getExchange", "outputs": [{"type": "address", "name": "out"}], "inputs": [{"type": "address", "name": "token"}], "constant": true, "payable": false, "type": "function", "gas": 715}, {"name": "getToken", "outputs": [{"type": "address", "name": "out"}], "inputs": [{"type": "address", "name": "exchange"}], "constant": true, "payable": false, "type": "function", "gas": 745}, {"name": "getTokenWithId", "outputs": [{"type": "address", "name": "out"}], "inputs": [{"type": "uint256", "name": "token_id"}], "constant": true, "payable": false, "type": "function", "gas": 736}, {"name": "exchangeTemplate", "outputs": [{"type": "address", "name": "out"}], "inputs": [], "constant": true, "payable": false, "type": "function", "gas": 633}, {"name": "tokenCount", "outputs": [{"type": "uint256", "name": "out"}], "inputs": [], "constant": true, "payable": false, "type": "function", "gas": 663}]
+
+module.exports = { poolAddrs, uniswapV1, poolABI }
