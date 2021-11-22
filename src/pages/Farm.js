@@ -2,7 +2,8 @@ import { useState, useEffect } from "react"
 import styled from "styled-components"
 import BigNumber from "bignumber.js"
 import Web3 from "web3"
-import { AirdropContract, FaucetContract } from "../utils/contracts"
+import { AirdropContract } from "../utils/contracts"
+// import { FaucetContract } from "../utils/contracts"  // for checking if user is subscribed
 import { MdAdd, MdRemove } from "react-icons/md"
 import SubmitValue from "./SubmitValue"
 import ERC20 from "../utils/ABI/ERC20"
@@ -266,6 +267,7 @@ export default function Farm({ connection, list, setList }) {
 
   useEffect(() => {
     const calcApr = async (pair, tokenPrice, freeRate) => {
+      // seconds in year * free reward rate * free price / token price * 100
       const APR = ONE_YEAR
       .multipliedBy(freeRate)
       .multipliedBy(prices.free)
@@ -327,8 +329,9 @@ export default function Farm({ connection, list, setList }) {
     }
 
     // Handles all tokens that are not a pair, but a single token.
-    const singleTokenInterface = async () => {
-      return "-"
+    const singleTokenInterface = async (pair, price) => {
+      const apr = calcApr(pair, price, pair.rate)
+      return apr
     }
 
     // Choose which price reference to use
@@ -349,8 +352,8 @@ export default function Farm({ connection, list, setList }) {
           apr = await alternateInterface() // call alternate interface to handle it
           return
         } else if(pair.symbol.length <= 4) {
-          apr = await singleTokenInterface(pair, priceRefAddr, priceRef) // call single token APR calculation
-          return
+          // apr = await singleTokenInterface(pair, priceRefAddr, priceRef) // call single token APR calculation
+          apr = await calcApr(pair, priceRef, pair.rate)
         } else {
           apr = await defaultInterface(pair, priceRefAddr, priceRef)
         }
