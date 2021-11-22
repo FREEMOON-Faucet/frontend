@@ -138,6 +138,8 @@ export default function Farm({ connection, list, setList }) {
     // any: ""
   })
 
+  const [ APRList, setAPRList ] = useState([])
+
   useEffect(() => {
     let refreshing
 
@@ -263,13 +265,16 @@ export default function Farm({ connection, list, setList }) {
   }, [ connection, setList ])
 
   useEffect(() => {
-
     const calcApr = async (pair, tokenPrice, freeRate) => {
-      console.log(`${ pair.symbol }: ${ ONE_YEAR
-        .multipliedBy(freeRate)
-        .multipliedBy(prices.free)
-        .dividedBy(tokenPrice)
-        .multipliedBy("100").toFixed() }`)
+      const APR = ONE_YEAR
+      .multipliedBy(freeRate)
+      .multipliedBy(prices.free)
+      .dividedBy(tokenPrice)
+      .multipliedBy("100").toFixed(2)
+
+      // console.log(`${ pair.symbol }: ${ APR }`)
+
+      return APR
     }
     
     const getTokenPrice = async (web3, reserve, supply, price) => {
@@ -294,6 +299,7 @@ export default function Farm({ connection, list, setList }) {
       return { token0, token1 }
     }
     
+    // Handles all pairs that do not contain "anyswap" in title, or are single tokens.
     const defaultInterface = async (pair, priceRefAddr, price) => {
       const web3 = new Web3(connection.provider)
       const farmable = new web3.eth.Contract(poolABI, pair.addr)
@@ -309,27 +315,53 @@ export default function Farm({ connection, list, setList }) {
         const lpTokenPrice = await getTokenPrice(web3, refReserve, supply, price)
         // console.log(`Pair: ${ pair.symbol } ${ lpTokenPrice.toFixed() }`)
         const apr = calcApr(pair, lpTokenPrice, pair.rate)
-      } else console.log(`Pair: ${ pair.symbol } does not include a price ref`)
+        return apr
+      } else {
+        console.log(`Pair: ${ pair.symbol } does not include a price ref`)
+      }
     }
     
-    const anyswapInterface = async () => {}
+    // Handles all pairs with "anyswap" in their title.
+    const alternateInterface = async () => {
+      return "-"
+    }
+
+    // Handles all tokens that are not a pair, but a single token.
+    const singleTokenInterface = async () => {
+      return "-"
+    }
+
+    // Choose which price reference to use
+    const getPriceReference = pair => {
+      if(pair.symbol.includes("FSN")) return { priceRefAddr: poolAddrs.fsn, priceRef: prices.fsn }
+      else if(pair.symbol.includes("FMN")) return { priceRefAddr: poolAddrs.fmn, priceRef: prices.fmn }
+      else if(pair.symbol.includes("FREE")) return { priceRefAddr: poolAddrs.free, priceRef: prices.free }
+      else if(pair.symbol.includes("ANY")) return { priceRefAddr: null, priceRef: null }
+    }
 
     const getAprs = async () => {
+      let apr = "-"
+      let aprList = []
       list.map(async (pair, i) => {
-        if(pair.symbol.toLowerCase().includes("anyswap")) return // call anyswap interface to handle it
-        else if(pair.symbol.length <= 4) return // call single token APR calculation
-        if(pair.symbol.includes("FSN")) {
-          await defaultInterface(pair, poolAddrs.fsn, prices.fsn)
-        } else if(pair.symbol.includes("FMN")) {
-          await defaultInterface(pair, poolAddrs.fmn, prices.fmn)
-        } else if(pair.symbol.includes("FREE")) {
-          await defaultInterface(pair, poolAddrs.free, prices.free)
-        } else if(pair.symbol.includes("ANY")) {
+        let { priceRefAddr, priceRef } = getPriceReference(pair)
+        if(!priceRefAddr || !priceRef) return
+        if(pair.symbol.toLowerCase().includes("anyswap")) {
+          apr = await alternateInterface() // call alternate interface to handle it
+          return
+        } else if(pair.symbol.length <= 4) {
+          apr = await singleTokenInterface(pair, priceRefAddr, priceRef) // call single token APR calculation
+          return
         } else {
-          console.log(`None of the above.`)
+          apr = await defaultInterface(pair, priceRefAddr, priceRef)
         }
+        // aprList[i] = apr
+        let prevState = APRList
+        prevState[i] = apr
+        setAPRList(prevState)
       })
+      // setAPRList(aprList)
     }
+
     getAprs()
   }, [ prices ])
 
@@ -392,9 +424,6 @@ export default function Farm({ connection, list, setList }) {
     }
   }
 
-  const getApr = async farm => {
-    console.log(farm.symbol)
-  }
   
   if(connection.connected && (connection.chainId ===  "0xb660" || connection.chainId === "0x7f93")) {
     return (
@@ -405,7 +434,7 @@ export default function Farm({ connection, list, setList }) {
               Farm
             </BannerTitle>
             <BannerTitle>
-              Daily FREE / Token
+              APR
             </BannerTitle>
             <BannerTitle>
               Your Balance
@@ -423,7 +452,8 @@ export default function Farm({ connection, list, setList }) {
                 { farm.symbol }
               </Symbol>
               <Info>
-                { (ONE_DAY.multipliedBy(farm.rate)).toFixed(5) }
+                {/* { (ONE_DAY.multipliedBy(farm.rate)).toFixed(5) } */}
+                { APRList[index] || "-" }%
               </Info>
               <Info>
                 { Number(farm.bal).toFixed(4) }
