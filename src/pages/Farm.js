@@ -123,7 +123,7 @@ const NavRow = styled.div`
   align-items: center;
   width: 100%;
   height: 70px;
-  margin-top: 5px;
+  margin: 5px 0;
   font-size: 1rem;
   font-style: italic;
   user-select: none;
