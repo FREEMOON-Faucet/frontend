@@ -157,13 +157,6 @@ export default function Farm({ connection, list, setList }) {
     confirm: null
   })
 
-  const [ prices, setPrices ] = useState({
-    free: "",
-    fmn: "",
-    fsn: "",
-    // any: ""
-  })
-
   const [ APRList, setAPRList ] = useState([])
 
   const [ maxPage, setMaxPage ] = useState(0)
@@ -228,7 +221,8 @@ export default function Farm({ connection, list, setList }) {
       }
       setMaxPage(maxPageValue)
       setButtons(buttonsActive)
-      setList(farms)
+
+      return farms
     }
 
     const getPrices = async () => {
@@ -279,25 +273,14 @@ export default function Farm({ connection, list, setList }) {
       //   // console.log(`${ names[i] }, $${ price.toFixed() }`)
       // }
 
-      setPrices({
+      return {
         free: freePrice,
         fmn: fmnPrice,
-        fsn: fsnPrice,
-        // any: ""
-      })
+        fsn: fsnPrice
+      }
     }
 
-    const startLoading = async () => {
-      const { web3, airdrop, account } = await connect()
-      loadFarms({ web3, airdrop, account })
-      getPrices()
-    }
-
-    if(connection.connected && (connection.chainId ===  "0xb660" || connection.chainId === "0x7f93")) startLoading()
-  }, [ connection, setList, currentPage ])
-
-  useEffect(() => {
-    const calcApr = async (pair, tokenPrice, freeRate) => {
+    const calcApr = async (pair, tokenPrice, freeRate, prices) => {
       // seconds in year * free reward rate * free price / token price * 100
       const APR = ONE_YEAR
       .multipliedBy(freeRate)
@@ -333,7 +316,7 @@ export default function Farm({ connection, list, setList }) {
     }
     
     // Handles all pairs that do not contain "anyswap" in title, or are single tokens.
-    const defaultInterface = async (pair, priceRefAddr, price) => {
+    const defaultInterface = async (pair, priceRefAddr, price, prices) => {
       const web3 = new Web3(connection.provider)
       const farmable = new web3.eth.Contract(poolABI, pair.addr)
       const { token0, token1 } = await getComponentTokens(farmable)
@@ -347,7 +330,7 @@ export default function Farm({ connection, list, setList }) {
         const supply = await getLPTokenSupply(web3, farmable)
         const lpTokenPrice = await getTokenPrice(web3, refReserve, supply, price)
         // console.log(`Pair: ${ pair.symbol } ${ lpTokenPrice.toFixed() }`)
-        const apr = calcApr(pair, lpTokenPrice, pair.rate)
+        const apr = calcApr(pair, lpTokenPrice, pair.rate, prices)
         return apr
       } else {
         console.log(`Pair: ${ pair.symbol } does not include a price ref`)
@@ -360,37 +343,50 @@ export default function Farm({ connection, list, setList }) {
     }
 
     // Choose which price reference to use
-    const getPriceReference = pair => {
+    const getPriceReference = (pair, prices) => {
       if(pair.symbol.includes("FSN")) return { priceRefAddr: poolAddrs.fsn, priceRef: prices.fsn }
       else if(pair.symbol.includes("FMN")) return { priceRefAddr: poolAddrs.fmn, priceRef: prices.fmn }
       else if(pair.symbol.includes("FREE")) return { priceRefAddr: poolAddrs.free, priceRef: prices.free }
       else if(pair.symbol.includes("ANY")) return { priceRefAddr: null, priceRef: null }
     }
 
-    const getAprs = async () => {
+    const getAprs = async (newList, newPrices) => {
       let apr = "-"
       let aprList = []
-      list.map(async (pair, i) => {
-        let { priceRefAddr, priceRef } = getPriceReference(pair)
-        if(!priceRefAddr || !priceRef) return
+
+      for(let i = 0; i < newList.length; i++) {
+        let pair = newList[ i ]
+        let { priceRefAddr, priceRef } = getPriceReference(pair, newPrices)
+        if(!priceRefAddr || !priceRef) continue
         if(pair.symbol.toLowerCase().includes("anyswap")) {
-          apr = await alternateInterface() // call alternate interface to handle it
-          return
+          // apr = await alternateInterface() // call alternate interface to handle it
+          continue
         } else if(pair.symbol.length <= 4) {
-          apr = await calcApr(pair, priceRef, pair.rate)
+          apr = await calcApr(pair, priceRef, pair.rate, newPrices)
         } else {
-          apr = await defaultInterface(pair, priceRefAddr, priceRef)
+          apr = await defaultInterface(pair, priceRefAddr, priceRef, newPrices)
         }
-        // aprList[i] = apr
-        let prevState = APRList
-        prevState[i] = apr
-        setAPRList(prevState)
-      })
-      // setAPRList(aprList)
+        console.log(`${ pair.symbol }: ${ apr }`)
+        aprList[ i ] = apr
+      }
+      
+      console.log(`APRs loaded. (${ aprList.length })`)
+
+      setList(newList)
+      setAPRList(aprList)
     }
 
-    getAprs()
-  }, [ prices ])
+    const startLoading = async () => {
+      setList([])
+      setAPRList([])
+      const { web3, airdrop, account } = await connect()
+      let newList = await loadFarms({ web3, airdrop, account })
+      let newPrices = await getPrices()
+      await getAprs(newList, newPrices)
+    }
+
+    if(connection.connected && (connection.chainId ===  "0xb660" || connection.chainId === "0x7f93")) startLoading()
+  }, [ connection, setList, currentPage ])
 
   const stake = async (val, extra, index) => {
     let buttonsList = buttons
