@@ -133,7 +133,8 @@ export default function Dashboard({ connection }) {
   useEffect(() => {
     const getStats = async () => {
       const network = config.networks.fsnMainnet
-      const web3 = new Web3(connection.provider)
+      let provider = connection.connected ? connection.provider : network.provider
+      const web3 = new Web3(provider)
 
       const free = await FreeContract(web3)
       const fmn = await FmnContract(web3)
@@ -142,15 +143,15 @@ export default function Dashboard({ connection }) {
       /*
          Until CORS works with gateway, I'm going to disable automatic loading and require that web3 provider is active.
       */
-      getBalanceSupply(web3, free, fmn, connection.accounts[0])
-      // else getBalanceSupply(web3, free, fmn)
+      if(connection.connected) getBalanceSupply(web3, free, fmn, connection.accounts[0])
+      else getBalanceSupply(web3, free, fmn)
 
       getFreemoonFaucet(web3, network, faucet)
       getFusionMainnet()
       getLatestWin(web3, free, faucet)
     }
 
-    if(connection.connected) getStats()
+    getStats()
   }, [ connection ])
 
   const getBalanceSupply = async (web3, free, fmn, account) => {

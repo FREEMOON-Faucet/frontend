@@ -4,10 +4,11 @@ import BigNumber from "bignumber.js"
 import Web3 from "web3"
 import { AirdropContract } from "../utils/contracts"
 // import { FaucetContract } from "../utils/contracts"  // for checking if user is subscribed
-import { MdAdd, MdRemove } from "react-icons/md"
+import { MdAdd, MdRemove, MdKeyboardArrowLeft, MdKeyboardArrowRight } from "react-icons/md"
 import SubmitValue from "./SubmitValue"
 import ERC20 from "../utils/ABI/ERC20"
-import { poolAddrs, poolABI, uniswapV1 } from "../utils/pricePools"
+import { poolAddrs, poolABI } from "../utils/pricePools"
+// import { uniswapV1 } from "../utils/pricePools"  // if this is the correct abi
 
 const FarmContainer = styled.div`
   display: flex;
@@ -116,6 +117,30 @@ const Harvest = styled.div`
   cursor: ${ props => props.active ? "pointer" : "default" };
 `
 
+const NavRow = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  height: 70px;
+  margin-top: 5px;
+  font-size: 1rem;
+  font-style: italic;
+  user-select: none;
+`
+
+const NavArrow = styled.div`
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 10%;
+  height: 60px;
+  border-radius: 5px;
+  background: #fff;
+  cursor: ${ props => props.active ? "pointer" : "default" };
+  opacity: ${ props => props.active ? "1" : "0.5" };
+`
+
 
 export default function Farm({ connection, list, setList }) {
 
@@ -141,8 +166,15 @@ export default function Farm({ connection, list, setList }) {
 
   const [ APRList, setAPRList ] = useState([])
 
+  const [ maxPage, setMaxPage ] = useState(0)
+  const [ currentPage, setCurrentPage ] = useState(0)
+
   useEffect(() => {
-    let refreshing
+    const getLoadSet = (count, current, max) => {
+      let lower = current * 10
+      let upper = (lower + 9) >= max * 10 ? count - 1 : lower + 9
+      return { lower, upper }
+    }
 
     const connect = async () => {
       const web3 = new Web3(connection.provider)
@@ -154,13 +186,16 @@ export default function Farm({ connection, list, setList }) {
     const loadFarms = async ({ web3, airdrop, account }) => {
       console.log(`Refresh farming ...`)
       const farmAssetCount = await airdrop.methods.farmingAssetCount().call()
+      let maxPageValue = Math.ceil(farmAssetCount / 10) - 1
+      const { lower, upper } = getLoadSet(Number(farmAssetCount), currentPage, maxPageValue)
+      console.log(lower, upper)
       let pending = []
-      for(let i = 0; i < farmAssetCount; i++) {
+      for(let i = lower; i <= upper; i++) {
         pending.push(airdrop.methods.farmingAssets(i).call())
       }
       const farmAddresses = await Promise.all(pending)
       let symbolsPending = [], ratesPending = [], balancesPending = [], farmBalancesPending = [], earningsPending = []
-      for(let i = 0; i < farmAssetCount; i++) {
+      for(let i = 0; i < farmAddresses.length; i++) {
         let currentToken = new web3.eth.Contract(ERC20, farmAddresses[i])
         symbolsPending.push(airdrop.methods.assetSymbol(farmAddresses[i]).call())
         ratesPending.push(airdrop.methods.farmRewardPerSec(farmAddresses[i]).call())
@@ -191,6 +226,7 @@ export default function Farm({ connection, list, setList }) {
           sub: Number(farms[i].farmBal) > 0
         })
       }
+      setMaxPage(maxPageValue)
       setButtons(buttonsActive)
       setList(farms)
     }
@@ -254,16 +290,11 @@ export default function Farm({ connection, list, setList }) {
     const startLoading = async () => {
       const { web3, airdrop, account } = await connect()
       loadFarms({ web3, airdrop, account })
-      refreshing = setInterval(() => {
-        getPrices()
-        loadFarms({ web3, airdrop, account })
-      }, 10000)
+      getPrices()
     }
 
     if(connection.connected && (connection.chainId ===  "0xb660" || connection.chainId === "0x7f93")) startLoading()
-
-    return () => clearInterval(refreshing)
-  }, [ connection, setList ])
+  }, [ connection, setList, currentPage ])
 
   useEffect(() => {
     const calcApr = async (pair, tokenPrice, freeRate) => {
@@ -328,12 +359,6 @@ export default function Farm({ connection, list, setList }) {
       return "-"
     }
 
-    // Handles all tokens that are not a pair, but a single token.
-    const singleTokenInterface = async (pair, price) => {
-      const apr = calcApr(pair, price, pair.rate)
-      return apr
-    }
-
     // Choose which price reference to use
     const getPriceReference = pair => {
       if(pair.symbol.includes("FSN")) return { priceRefAddr: poolAddrs.fsn, priceRef: prices.fsn }
@@ -352,7 +377,6 @@ export default function Farm({ connection, list, setList }) {
           apr = await alternateInterface() // call alternate interface to handle it
           return
         } else if(pair.symbol.length <= 4) {
-          // apr = await singleTokenInterface(pair, priceRefAddr, priceRef) // call single token APR calculation
           apr = await calcApr(pair, priceRef, pair.rate)
         } else {
           apr = await defaultInterface(pair, priceRefAddr, priceRef)
@@ -456,7 +480,7 @@ export default function Farm({ connection, list, setList }) {
               </Symbol>
               <Info>
                 {/* { (ONE_DAY.multipliedBy(farm.rate)).toFixed(5) } */}
-                { APRList[index] || "-" }%
+                { APRList[ index ] || "-" }%
               </Info>
               <Info>
                 { Number(farm.bal).toFixed(4) }
@@ -469,13 +493,13 @@ export default function Farm({ connection, list, setList }) {
               </Info>
               <Info>
                 <InfoRow>
-                  <Harvest active={ buttons[index] && buttons[index].harvest } onClick={ () => buttons[index] && buttons[index].harvest ? harvest(farm, index) : "" }>
+                  <Harvest active={ buttons[ index ] && buttons[ index ].harvest } onClick={ () => buttons[ index ] && buttons[ index ].harvest ? harvest(farm, index) : "" }>
                     Harvest
                   </Harvest>
                 </InfoRow>
                 <InfoRow>
-                  <AddSub active={ buttons[index] && buttons[index].add } onClick={() => {
-                    if(buttons[index] && buttons[index].add) {
+                  <AddSub active={ buttons[ index ] && buttons[ index ].add } onClick={() => {
+                    if(buttons[ index ] && buttons[ index ].add) {
                       setSubmission({
                         action: "Stake",
                         max: farm.bal,
@@ -488,8 +512,8 @@ export default function Farm({ connection, list, setList }) {
                   }}>
                     <MdAdd size={ 25 }/>
                   </AddSub>
-                  <AddSub active={ buttons[index] && buttons[index].sub } onClick={() => {
-                    if(buttons[index] && buttons[index].sub) {
+                  <AddSub active={ buttons[ index ] && buttons[ index ].sub } onClick={() => {
+                    if(buttons[ index ] && buttons[ index ].sub) {
                       setSubmission({
                         action: "Unstake",
                         max: farm.farmBal,
@@ -507,6 +531,15 @@ export default function Farm({ connection, list, setList }) {
             </Farmable>
           )) }
         </FarmList>
+        <NavRow>
+          <NavArrow onClick={ () => setCurrentPage(prev => prev > 0 ? prev - 1 : 0) } active={ currentPage > 0 }>
+            <MdKeyboardArrowLeft size={ 35 }/>
+          </NavArrow>
+          Page { currentPage + 1 }/{ maxPage + 1 }
+          <NavArrow onClick={ () => setCurrentPage(prev => prev < maxPage ? prev + 1 : maxPage) } active={ currentPage < maxPage }>
+            <MdKeyboardArrowRight size={ 35 }/>
+            </NavArrow>
+        </NavRow>
 
         {
           displaySubmit
