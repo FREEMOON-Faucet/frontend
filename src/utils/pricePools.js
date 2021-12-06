@@ -4,12 +4,14 @@ const poolAddrs = {
   // fsnUsdt: "0x4a7d2ef2e539096d5afa546fffcb5251055854a8",
   // fsnBusd: "0xf16931793c16bbe0a490c0d96a4938e57b9c9f69",
   fsnUsdt: "0x29a257778d22c1325a59768e1262253233a62030",
+  chngUsdt: "0x41607cc59ed2358b7b70d8fa8c361192a6973785",
   anyFsn: "0x049ddc3cd20ac7a2f6c867680f7e21de70aca9c3",
   
   fsn: "0x5555e10d7e69b7246af27fe1a93466a84c199b6f",
   fmn: "0xb80a6c4f2a279ec91921ca30da726c534462125c",
   free: "0x6403eDe3b7604ea4883670c670BeA288618BD5F2",
-  usdt: "0x9c061dc72c0203f643f9a348dfcce3e73b5bd2c8"
+  usdt: "0x9c061dc72c0203f643f9a348dfcce3e73b5bd2c8",
+  chng: "0xed0294dbd2a0e52a09c3f38a09f6e03de2c44fcf"
 }
 
 const poolABI = [
