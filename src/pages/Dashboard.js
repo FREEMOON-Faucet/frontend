@@ -200,9 +200,9 @@ export default function Dashboard({ connection }) {
     const historicWins = await faucet.methods.winners().call()
 
     if(historicWins.toString() !== "0") {
-      for(let i = 0; i < latestBlock; i++) {
+      for(let i = 0; i < latestBlockNumber; i++) {
         console.log("Loop number: ", i)
-        latestWinEvents = await faucet.getPastEvents("Win", {fromBlock: currentBlockNumber, toBlock: currentBlockNumber})
+        latestWinEvents = await faucet.getPastEvents("Win", { fromBlock: currentBlockNumber,  toBlock: currentBlockNumber })
         if(latestWinEvents.length) {
           break
         } else {
@@ -212,21 +212,32 @@ export default function Dashboard({ connection }) {
       console.log(currentBlockNumber)
       console.log("Should only be here with events: ", latestWinEvents)
       let latest = latestWinEvents[0]
-      const timestamp = (await web3.eth.getBlock(currentBlockNumber)).timestamp
-      const winningHash = web3.utils.soliditySha3(
+      const winBlock = (await web3.eth.getBlock(latest.returnValues.blockHash))
+      const timestamp = winBlock.timestamp
+      // const winningHash = web3.utils.soliditySha3(
+      //   latest.returnValues.lottery,
+      //   latest.returnValues.txHash,
+      //   latest.returnValues.blockHash
+      // )
+      const isWin = await faucet.methods.checkIfWin(
         latest.returnValues.lottery,
         latest.returnValues.txHash,
         latest.returnValues.blockHash
-      )
+      ).call()
+      console.log(isWin[0])
+      const winningHash = web3.utils.toHex(isWin[0])
+      console.log(winningHash)
+
       
-      const freeHodl = await free.methods.balanceOf(latest.returnValues.entrant).call()
+      // const claimsTaken = await faucet.methods.claims().call({}, winBlock.number)
+      // const freeHodl = await free.methods.balanceOf(latest.returnValues.entrant).call({}, winBlock.number)
       setLatestWin({
         by: latest.returnValues.entrant,
-        blockHeight: currentBlockNumber,
+        blockHeight: winBlock.number,
         date: new Date(timestamp*1000).toUTCString(),
         winningHash: winningHash,
-        claimsSincePrevious: latest.returnValues.claimsTaken,
-        freeHodl: web3.utils.fromWei(freeHodl)
+        // claimsSincePrevious: claimsTaken,
+        // freeHodl: web3.utils.fromWei(freeHodl)
       })
     }
   }
@@ -326,14 +337,14 @@ export default function Dashboard({ connection }) {
             <Label>Winning Hash</Label>
             <Number>{latestWin.winningHash}</Number>
           </Row>
-          <Row>
+          {/* <Row>
             <Label>Claims to Win</Label>
             <Number>{latestWin.claimsSincePrevious.toString()}</Number>
           </Row>
           <Row>
             <Label>FREE in HODL</Label>
             <Number>{latestWin.freeHodl.toString()}</Number>
-          </Row>
+          </Row> */}
         </Box>
       </DashColumn>
     </DashboardRow>
