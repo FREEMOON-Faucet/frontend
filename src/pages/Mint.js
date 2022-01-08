@@ -7,6 +7,9 @@ import { ImLock, ImUnlocked } from "react-icons/im"
 import ERC20 from "../utils/ABI/ERC20"
 import SubmitValue from "./SubmitValue"
 import { poolAddrs, poolABI } from "../utils/pricePools"
+import UniswapV2Router02 from "../utils/ABI/UniswapV2Router02"
+import UniswapV2Factory from "../utils/ABI/UniswapV2Factory"
+import UniswapV2Pair from "../utils/ABI/UniswapV2Pair"
 import { MdKeyboardArrowLeft, MdKeyboardArrowRight } from "react-icons/md"
 
 const MintContainer = styled.div`
@@ -275,7 +278,7 @@ export default function Mint({ connection, list, setList, term, setTerm }) {
       const [ freeReserve, freeUsdtReserve ] = formatReserves(freeReserves._reserve0, freeReserves._reserve1)
       const [ fmnReserve, fmnUsdtReserve ] = formatReserves(fmnReserves._reserve1, fmnReserves._reserve0)
       const [ fsnReserve, fsnUsdtReserve ] = formatReserves(fsnReserves._reserve0, fsnReserves._reserve1)
-      const [ chngReserve, chngUsdtReserve ] = formatReserves(chngReserves._reserve0, chngReserves._reserve1)
+      const [ chngReserve, chngUsdtReserve ] = formatReserves(chngReserves._reserve1, chngReserves._reserve0)
 
       // console.log(freeReserve.toFixed(), freeUsdtReserve.toFixed())
       // console.log(`FREE price: ${ freeUsdtReserve.dividedBy(freeReserve).toFixed() }`)

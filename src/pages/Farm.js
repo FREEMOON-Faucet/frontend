@@ -181,7 +181,7 @@ export default function Farm({ connection, list, setList }) {
       const farmAssetCount = await airdrop.methods.farmingAssetCount().call()
       let maxPageValue = Math.ceil(farmAssetCount / 10) - 1
       const { lower, upper } = getLoadSet(Number(farmAssetCount), currentPage, maxPageValue)
-      console.log(lower, upper)
+      // console.log(lower, upper)
       let pending = []
       for(let i = lower; i <= upper; i++) {
         pending.push(airdrop.methods.farmingAssets(i).call())
@@ -366,7 +366,7 @@ export default function Farm({ connection, list, setList }) {
         } else {
           apr = await defaultInterface(pair, priceRefAddr, priceRef, newPrices)
         }
-        console.log(`${ pair.symbol }: ${ apr }`)
+        // console.log(`${ pair.symbol }: ${ apr }`)
         aprList[ i ] = apr
       }
       
