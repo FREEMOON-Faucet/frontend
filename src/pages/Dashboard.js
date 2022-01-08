@@ -148,7 +148,7 @@ export default function Dashboard({ connection }) {
 
       getFreemoonFaucet(web3, network, faucet)
       getFusionMainnet()
-      getLatestWin(web3, free, faucet)
+      // getLatestWin(web3, free, faucet)
     }
 
     getStats()
