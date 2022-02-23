@@ -1,3 +1,4 @@
+import axios from "axios"
 import { useState, useEffect } from "react"
 import styled from "styled-components"
 import Web3 from "web3"
@@ -122,7 +123,7 @@ export default function Dashboard({ connection }) {
   //   totalFmn: ZERO
   // })
   const [ latestWin, setLatestWin ] = useState({
-    by: "No Winners Yet",
+    by: "-",
     blockHeight: "-",
     date: "-",
     winningHash: "-",
@@ -148,7 +149,7 @@ export default function Dashboard({ connection }) {
 
       getFreemoonFaucet(web3, network, faucet)
       getFusionMainnet()
-      // getLatestWin(web3, free, faucet)
+      getLatestWin(web3, free, faucet)
     }
 
     getStats()
@@ -193,46 +194,27 @@ export default function Dashboard({ connection }) {
   const getFusionMainnet = async () => {}
 
   const getLatestWin = async (web3, free, faucet) => {
-    let latestBlock = await web3.eth.getBlock("latest")
-    let latestBlockNumber = latestBlock.number
-    let currentBlockNumber = latestBlockNumber
-    let latestWinEvents
     const historicWins = await faucet.methods.winners().call()
 
     if(historicWins.toString() !== "0") {
-      for(let i = 0; i < latestBlockNumber; i++) {
-        console.log("Loop number: ", i)
-        latestWinEvents = await faucet.getPastEvents("Win", { fromBlock: currentBlockNumber,  toBlock: currentBlockNumber })
-        if(latestWinEvents.length) {
-          break
-        } else {
-          currentBlockNumber--
-        }
-      }
-      console.log(currentBlockNumber)
-      console.log("Should only be here with events: ", latestWinEvents)
-      let latest = latestWinEvents[0]
-      const winBlock = (await web3.eth.getBlock(latest.returnValues.blockHash))
+      const wins = await axios.get("https://api.freemoonfaucet.xyz/api/v1/wins")
+      const latest = wins.data.latest
+      const winBlock = await web3.eth.getBlock(latest.blockNumber)
       const timestamp = winBlock.timestamp
-      // const winningHash = web3.utils.soliditySha3(
-      //   latest.returnValues.lottery,
-      //   latest.returnValues.txHash,
-      //   latest.returnValues.blockHash
-      // )
       const isWin = await faucet.methods.checkIfWin(
-        latest.returnValues.lottery,
-        latest.returnValues.txHash,
-        latest.returnValues.blockHash
+        latest.lottery,
+        latest.txHash,
+        latest.blockHash
       ).call()
-      console.log(isWin[0])
+      console.log("winning number: ", isWin[0])
       const winningHash = web3.utils.toHex(isWin[0])
-      console.log(winningHash)
+      console.log("winning hash: ", winningHash)
 
       
       // const claimsTaken = await faucet.methods.claims().call({}, winBlock.number)
       // const freeHodl = await free.methods.balanceOf(latest.returnValues.entrant).call({}, winBlock.number)
       setLatestWin({
-        by: latest.returnValues.entrant,
+        by: latest.entrant,
         blockHeight: winBlock.number,
         date: new Date(timestamp*1000).toUTCString(),
         winningHash: winningHash,
