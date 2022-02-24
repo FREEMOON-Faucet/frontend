@@ -101,6 +101,10 @@ const Detail = styled.p`
   text-align: center;
 `
 
+const A = styled.a`
+  color: #92b4e3;
+`
+
 
 export default function Dashboard({ connection }) {
 
@@ -127,6 +131,7 @@ export default function Dashboard({ connection }) {
     blockHeight: "-",
     date: "-",
     winningHash: "-",
+    txHash: "-",
     claimsSincePrevious: "-",
     freeHodl: "-"
   })
@@ -227,7 +232,8 @@ export default function Dashboard({ connection }) {
         by: latest.entrant,
         blockHeight: winBlock.number,
         date: new Date(timestamp*1000).toUTCString(),
-        winningHash: winningHash
+        winningHash: winningHash,
+        txHash: latest.txHash
         // claimsSincePrevious: claimsTaken,
         // freeHodl: web3.utils.fromWei(freeHodl)
       })
@@ -328,6 +334,10 @@ export default function Dashboard({ connection }) {
           <Row>
             <Label>Winning Calculated Hash Number</Label>
             <Number>{latestWin.winningHash}</Number>
+          </Row>
+          <Row>
+            <Label>Winning Claim</Label>
+            <Number><A href={`https://fsnex.com/transaction/${latestWin.txHash}`} target="_blank">{latestWin.txHash}</A></Number>
           </Row>
           {/* <Row>
             <Label>Claims to Win</Label>
