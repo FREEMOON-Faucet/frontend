@@ -131,6 +131,18 @@ export default function Dashboard({ connection }) {
     freeHodl: "-"
   })
 
+  const padHash = hash => {
+    let paddedHash = hash
+
+    if(hash.length < 64) {
+      for(let i = 0; i < (64 - hash.length); i++) {
+        paddedHash = "0" + paddedHash
+      }
+    }
+
+    return "0x" + paddedHash
+  }
+
   useEffect(() => {
     const getStats = async () => {
       const network = config.networks.fsnMainnet
@@ -199,16 +211,14 @@ export default function Dashboard({ connection }) {
     if(historicWins.toString() !== "0") {
       const wins = await axios.get("https://api.freemoonfaucet.xyz/api/v1/wins")
       const latest = wins.data.latest
-      const winBlock = await web3.eth.getBlock(latest.blockNumber)
+      const winBlock = await web3.eth.getBlock(latest.blockHash)
       const timestamp = winBlock.timestamp
       const isWin = await faucet.methods.checkIfWin(
         latest.lottery,
         latest.txHash,
         latest.blockHash
       ).call()
-      console.log("winning number: ", isWin[0])
-      const winningHash = web3.utils.toHex(isWin[0])
-      console.log("winning hash: ", winningHash)
+      const winningHash = padHash(web3.utils.toHex(isWin[0]).slice(2))
 
       
       // const claimsTaken = await faucet.methods.claims().call({}, winBlock.number)
@@ -217,7 +227,7 @@ export default function Dashboard({ connection }) {
         by: latest.entrant,
         blockHeight: winBlock.number,
         date: new Date(timestamp*1000).toUTCString(),
-        winningHash: winningHash,
+        winningHash: winningHash
         // claimsSincePrevious: claimsTaken,
         // freeHodl: web3.utils.fromWei(freeHodl)
       })
@@ -316,7 +326,7 @@ export default function Dashboard({ connection }) {
             <Number>{latestWin.date}</Number>
           </Row>
           <Row>
-            <Label>Winning Hash</Label>
+            <Label>Winning Calculated Hash Number</Label>
             <Number>{latestWin.winningHash}</Number>
           </Row>
           {/* <Row>
