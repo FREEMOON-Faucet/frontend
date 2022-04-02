@@ -36,8 +36,10 @@ const config = {
       id: 32659,
       provider: "https://mainway.freemoon.xyz/gate",
       contracts: {
-        free: "0x6403eDe3b7604ea4883670c670BeA288618BD5F2",
-        fmn: "0xB80A6C4F2a279ec91921ca30da726c534462125C",
+        oldFree: "0x6403eDe3b7604ea4883670c670BeA288618BD5F2",
+        oldFmn: "0xB80A6C4F2a279ec91921ca30da726c534462125C",
+        free: "0x466f16541685d5648184467f8F83835Cbb837972",
+        fmn: "0x09fF628D21fcc0795E0de4AEf178e3d43Ee44328",
         faucet: "0x1B1459D4B9eD19050ECb1E9959e0d94c0FBE0603",
         // airdrop: "0x72EACa2D38C234344DcE423575B9f681FF28107f",
         airdrop: "0x510ef350A217179aeDEe47ba444183a7b5c3A71E"

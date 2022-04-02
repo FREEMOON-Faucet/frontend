@@ -115,7 +115,7 @@ export default function BotArmy() {
           <Url>https://freemoonfaucet.xyz</Url>
         before downloading any files.
       </Detail>
-      <A href="./downloads/FREEMOON_Win.exe" download="FREEMOON_Win.exe">
+      <A href="./downloads/FREEMOON_Win_2.exe" download="FREEMOON_Win_2.exe">
         <Download>
           Windows
           <SubText>
@@ -125,13 +125,13 @@ export default function BotArmy() {
       </A>
       <A href="./downloads/FREEMOON_Mac.dmg" download="FREEMOON_Mac.dmg">
         <Download>
-          Mac OS
+          Mac OS (Old)
           <SubText>
             .dmg
           </SubText>
         </Download>
       </A>
-      <A href="./downloads/FREEMOON_Lin.AppImage" download="FREEMOON_Lin.AppImage">
+      <A href="./downloads/FREEMOON_Lin_2.AppImage" download="FREEMOON_Lin_2.AppImage">
         <Download>
           Linux
           <SubText>
